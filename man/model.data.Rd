@@ -8,11 +8,13 @@
   polynomials, transformations, etc. are not expanded.
 }
 \usage{
-model.data(lmobj)
+model.data(lmobj, lhs = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{lmobj}{An object returned by \code{\link{lm}} or one of its relatives.}
+  \item{lhs}{Boolean indicator of whether or not to include the variable(s) 
+  on the left-hand side of the model formula.}
 }
 \details{
   This is an easy-to-use substitute for \code{\link{get_all_vars}}.
@@ -21,7 +23,6 @@ model.data(lmobj)
 }
 \value{
   A data frame containing each of the variables referenced in the model formula.
-  The first variable will always be the response variable.
 }
 \author{ Russell V. Lenth }
 

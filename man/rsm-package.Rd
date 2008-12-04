@@ -25,21 +25,13 @@ Finally, two more functions are provided that may be useful beyond response-surf
 or of any other \code{lm} object where a surface is fitted.  \code{\link{model.data}}
 recovers the data used in a \code{lm} call, but unlike \code{model.frame}, no
 polynomials, factors, etc. are expanded.
-}
-\details{
-\tabular{ll}{
-Package: \tab rsm\cr
-Type: \tab Package\cr
-Version: \tab 1.0\cr
-Date: \tab 2008-11-20\cr
-License: \tab GPL\cr
-LazyLoad: \tab yes\cr
-}
+
+For more information and examples, use \code{vignette("rsm", package = "rsm")}
 }
 \author{
 Russell V. Lenth
 
-Maintainer: Russ Lenth <russell-lenth@uiowa.edu>
+Maintainer: Russell V. Lenth <russell-lenth@uiowa.edu>
 }
 \references{
 Box, GEP, Hunter, JS, and Hunter, WG (2005), 
@@ -51,7 +43,3 @@ Meyers, RH and Montgomery, DC (2002),
 \keyword{ package }
 \keyword{ regression }
 
-%%%\seealso{
-%%%~~ Optional links to other man pages, e.g. ~~
-%%%~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
-%%%}

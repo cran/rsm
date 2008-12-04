@@ -46,7 +46,7 @@ canonical.path(object, which = ifelse(descent, length(object$b), 1), dist = seq(
   Take careful note of the fitted values along the outputted path (labeled \code{yhat}).  For example, if the stationary point is a maximum 
   (all eigenvalues negative), the fitted values from \code{steepest} will increase as far as the stationary point, then they will decrease as we proceed along what is now the path of slowest descent.
 }
-\seealso{\code{\link{rsm}}, \code{\ref{coded.data}}}
+\seealso{\code{\link{rsm}}, \code{\link{coded.data}}}
 \examples{
 library(rsm)
 heli.rsm = rsm (ave ~ block + SO(x1, x2, x3, x4), data = heli) 

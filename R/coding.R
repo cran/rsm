@@ -1,16 +1,19 @@
 ### Functions for handling coded data
 
-# parse a formula of the form coded ~ (orig - center) / midrange
+# parse a coding formula.
+# Normally expects the form coded ~ (orig - center) / divisor,
+# But any linear expression in one variable is OK.
 parse.coding = function(form) {
-  nm = c(coded = as.character(form[[2]]), orig = "")
-  const = c(center = 0, divisor = as.numeric(form[[3]][[3]]))
-  form = form[[3]][[2]][[2]]
-  nm[2] = as.character(form[[2]])
-  const[1] = as.numeric(form[[3]])
-  list(names = nm, const = const)
+  if (!inherits(form, "formula")) stop("Need a formula")
+  if (length(form) < 3) stop("Formula lacks a left-hand-side")
+  nm = all.vars(form)
+  names(nm) = c("coded", "orig")
+  rhs = as.character(form)[3]
+  a = eval(parse(text = sub(nm[2], "0", rhs)))
+  b = eval(parse(text = sub(nm[2], "1", rhs)))
+  d = 1 / (b - a)
+  list(names = nm, const=c(center = round(-a * d, 4), divisor = round(d, 4)))
 }
-
-
 
 
 # Code the data in a data.frame; may specify as arguments or in a list

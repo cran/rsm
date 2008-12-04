@@ -1,0 +1,158 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{mathpazo,amsmath}
+
+%%% \VignetteIndexEntry{Using the 'rsm' package}
+
+\title{Using the \texttt{rsm} package}
+\author{Russell V.~Lenth\\The University of Iowa}
+
+\begin{Scode}{echo=FALSE, results=hide}
+options(warn=-1)
+\end{Scode}
+
+\begin{document}
+\maketitle
+
+\def\bottomfraction{.75}
+\def\topfraction{.15}
+
+\DefineShortVerb{\"}
+
+\section{Overview}
+The "rsm" package provides several useful functions to facilitate 
+response-surface analysis.  The primary one is the "rsm" function itself,
+which is an extension of "lm" but with some enhancements.  In specifying a model in "rsm", the model formula is just like in "lm", ut the response-surface portion of the model is specified using one or more of the special functions "FO" (first-order), "TWI" (two-way interactions), "PQ" (pure quadratic), or "SO" (second-order, an alias for all three of the previous functions, combined).  The "summary" method for "rsm" results includes the usual regression summary (but with the coefficients compactly relabeled), an analysis of variance table with a lack-of-fit test, and additional information depending on the order of the model.
+
+An important aspect of response-surface analysis is using an appropriate coding transformation of the data.  The functions "coded.data", "as.coded.data", "decode.data", "code2val", and "val2code" facilitate these transformations; we simply provide formulas for the desired transformations.  If a "coded.data" object is used in place of an ordinary "data.frame" in the call, to "rsm", then appropriate additional output is provided in the "summary" and "steepest" outputs.
+
+Auxiliary functions include "steepest" for finding a path of steepest ascent (for second-order models, this uses ridge analysis); and "contour" for obyaining a contour plot of the response surface.
+
+\section{Chemical reactor example}
+The provided dataset "ChemReact" comes from Table~7.7 of Myers and Montgomery (2002).
+\begin{Scode}
+library(rsm)
+ChemReact
+\end{Scode}
+The context is that block "B1" of this data were collected first and analyzed, after which block "B2" was added and a new analysis was done.  Accordingly, we woll illustrate the analysis in two stages.
+
+\subsection{Coding of predictors}
+First, though, we need to take care of coding issues.  The data are provided in their original units, and the original experiment (block "B1") used factor settings of $\text{Time}=85\pm5$ and $\text{Temp}=175\pm5$, with three center points.  Thus, the coded variables are $x_1 = (\text{Time}-85)/5$ and $x_1 = (\text{Temp}-175)/5$.  Let's create a coded dataset with the appropriate codings.  We do this via formulas:
+\begin{Scode}
+CR = coded.data (ChemReact,  x1 ~ (Time - 85)/5,  x2 ~ (Temp - 175)/5 )
+CR[1:7, ]   ### Initial experiment only
+\end{Scode}
+
+\subsection{Analysis of initial block}
+The initial 7 runs are only good enough to estimate a first-order model.  We will fit this by calling "rsm" just like we would "lm", but use the special function "FO" (first-order response surface) in the model formula:
+\begin{Scode}
+CR.rsm1 = rsm (Yield ~ FO(x1, x2), data = CR, subset = 1:7)
+summary(CR.rsm1)
+\end{Scode}
+Note that the summary includes a lack-of-fit test, and it is significant.  We can try adding two-way interactions to see if it helps:
+\begin{Scode}
+CR.rsm1.5 = update(CR.rsm1, . ~ . + TWI(x1, x2))
+summary(CR.rsm1.5)
+\end{Scode}
+The lack of fit is still significant.  Note that the "summary" output now shows a canonical analysis rather than the direction of steepest ascent, as the response surface now has second-order terms.
+
+\subsection{Analysis of combined blocks}
+The lack-of-fit results motivate us to collect additional runs at ``star'' points, plus some additional center points; these are the second block.  In coded units, the data are
+\begin{Scode}
+CR[8:14, ]
+\end{Scode}
+The choice of $\alpha=\sqrt{2}$ provides for rotatability, and the blocks are orthogonal as well.  To do the analysis of the combined data, we should account for the block effect.  We could fit a full second-order model by including "FO", "TWI", and "PQ" terms, but this is more easily done using "SO" which generates all three sets of variables:
+\begin{Scode}
+CR.rsm2 = rsm (Yield ~ Block + SO(x1, x2), data = CR)
+summary(CR.rsm2)
+\end{Scode}
+This model fits well.  The canonical analysis reveals that the stationary point is near the center of the experiment and that both eigenvalues are negative.  This indicates that the fitted surface has a maximum at $\text{Time}\approx86.9, \text{Temp}\approx176.7$.  We may visualize the response surface using the "lm" method for "contour", provided with this package:
+\setkeys{Gin}{width=.5\linewidth}
+\begin{Scode}{fig=TRUE}
+contour (CR.rsm2, x2 ~ x1)
+points (.372, .334, pch = 2)
+\end{Scode}
+
+
+\section{Helicopter example}
+The provided dataset "heli" is presented in Table~12.5 of Box, Hunter, and Hunter~(2005).  It is also a central composite design in two blocks.  There are four variables and 30 observations altogether.  This is a "coded.data" object already; here are a few observations:
+\begin{Scode}
+heli[1:4, ]
+\end{Scode}
+The response variable "ave" is the average flight time (in csec.) of four test runs each of paper helicopters made with different wing areas $W$, wing-length ratios $R$, body widths $W$, and body lengths $L$.  The goal is to maximize flight time.
+
+Like the Chemical Reaction data, the first block was analyzed first and then the star points were added.  We'll skip the first part and go straight to the second-order analysis.
+\begin{Scode}
+heli.rsm = rsm(ave ~ block + SO(x1, x2, x3, x4), data=heli)
+summary(heli.rsm)
+\end{Scode}
+This time, the situation is more complicated.  Since the eigenvalues are of mixed sign, we have a saddle point.  Here we obtain contour plots of each pair of variables, holding the other two fixed at their stationary values.
+\begin{Scode}{label=contourcode, eval=FALSE}
+par (mfrow = c(2, 3))
+contour(heli.rsm, ~x1+x2+x3+x4, at=summary(heli.rsm)$canonical$xs)
+\end{Scode}
+The plots are shown in Figure~\ref{helicon}.
+\begin{figure}[b]
+\setkeys{Gin}{width=\linewidth}
+\begin{Scode}{fig=TRUE, height=9, width=12, echo=FALSE}
+\Scoderef{contourcode}
+\end{Scode}
+\caption{Contour plots for \texttt{heli} data.}\label{helicon}
+\end{figure}
+
+Since we have not found a maximum, our next step might be to experiment in the direction of steepest ascent:
+\begin{Scode}
+steepest (heli.rsm)
+\end{Scode}
+This gives a path that starts at the \emph{origin} in the coded variables.
+An alternative is to explore along a path through the \emph{stationary point}.  The function "canonical.path", by default, returns the path of steepest ascent each direction from the stationary point.  This path is linear.
+\begin{Scode}
+canonical.path(heli.rsm)
+\end{Scode}
+These paths match fairly closely in one direction as we proceed outward.  For example, the point at distance $-5$ from "canonical.path" is similar to the one at distance $4$
+from "steepest".
+
+\section{Miscellaneous notes and examples}
+\subsection{Coded data}
+Use "coded.data" as shown in the Chemical reactor example to convert a dataset that has its predictors in raw units.  If the dataset is already in coded units, you may embed the coding information using "as.coded.data":
+\begin{Scode}
+dat = expand.grid(t = c(-1,1), w = -1:1)
+dat = as.coded.data(dat, t ~ (Thickness - 3.5) / .5,  w ~ (Width - 12)/2)
+dat
+\end{Scode}
+\begin{Scode}
+decode.data(dat)
+\end{Scode}
+\begin{Scode}
+code2val(c(t = -.5, w = .25),  attr(dat, "codings"))
+\end{Scode}
+
+\subsection{Contour plots}
+The "contour" method provided by this package works for any "lm" object, not just response surfaces.  By default, it overlays the contour plot on an image plot
+using terrain colors.  Arguments provide for the image portion to be disabled or the colors changed if desired.
+
+To make "contour" work, it was necessary to obtain the data used by a "lm" object.  The standard function "get_all_vars" does not make it very easy, and "model.frame" incorporates transformations and expands polynomials and factors.  The provided function "model.data" makes it very easy to obtain just the variables included in the model formula.  For example, following the first-order model for the chemical reactor example,
+\begin{Scode}
+model.data (CR.rsm1, lhs = TRUE)
+\end{Scode}
+Note that only the observations in the original "subset" argument are included.
+
+
+
+\section*{References}
+\begin{description}
+\item Box, G.E.P., Hunter, J.S., and Hunter, W.G. (2005),
+\emph{Statistics for Experimenters: Design, Innovation, and Discovery} (2nd ed.), New York: Wiley-Interscience.
+\item Myers, R. H. and Montgomery, D. C. (2002), \emph{Response Surface Mehodology:
+Process and Product Optimization Using Designed Experiments} (2nd ed.),
+New York: Wiley-Interscience.
+\end{description}
+
+\section*{Contact information}
+Russell V. Lenth\\
+Department of Sttaistics\\
+The University of Iowa\\
+Iowa City, IA, USA  52242\\
+"russell-lenth@uiowa.edu"
+
+\end{document}
