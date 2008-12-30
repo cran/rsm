@@ -5,8 +5,16 @@
 Response-surface analysis
 }
 \description{
-The \code{rsm} package provides functions useful for analyzing
+The \code{rsm} package provides functions useful for designing and analyzing
 experiments that are done sequentially in hopes of optimizing a response surface.
+
+The function \code{\link{ccd}} can generate (and randomize) a central-composite 
+design; it allows the user to specify an aliasing or fractional blocking structure, and
+does a sanity check to make sure it is suitable for estimating a second-order model.
+The function \code{\link{bbd}} generates and randomizes a Box-Behnken design.  
+The function \code{\link{ccd.pick}} is useful for identifying good parameter choices
+in central-composite designs.
+
 The function \code{\link{rsm}} is an enhancement of \code{\link{lm}} that provides 
 for additional analyses peculiar to response surfaces.  It requires a model formula 
 that contains a call to \code{\link{FO}} or \code{\link{SO}} to specify a first- or 
@@ -26,7 +34,7 @@ or of any other \code{lm} object where a surface is fitted.  \code{\link{model.d
 recovers the data used in a \code{lm} call, but unlike \code{model.frame}, no
 polynomials, factors, etc. are expanded.
 
-For more information and examples, use \code{vignette("rsm", package = "rsm")}
+For more information and examples, use \code{vignette("rsm")}
 }
 \author{
 Russell V. Lenth

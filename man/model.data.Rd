@@ -4,7 +4,7 @@
 \description{
   Create a data frame with just the variables in the formula in 
   a \code{lm} object.  
-  This is comparable to \code{\link{model.frame}} except that factors,
+  This is comparable to \code{\link{model.matrix}} or \code{\link{model.frame}} except that factors,
   polynomials, transformations, etc. are not expanded.
 }
 \usage{
@@ -26,7 +26,7 @@ model.data(lmobj, lhs = FALSE)
 }
 \author{ Russell V. Lenth }
 
-\seealso{\code{\link{model.frame}}}
+\seealso{\code{\link{model.matrix}}, \code{\link{model.frame}}}
 \examples{
 library(rsm)
 trees.lm = lm(log(Volume) ~ poly(log(Girth),3), data=trees, subset=1:20)

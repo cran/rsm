@@ -1,0 +1,26 @@
+NEWS for rsm package
+
+Changes from version 1.10 over 1.01
+
+  * Added functions ccd() and bbd() for generating RS designs
+  
+  * Added function ccd.pick() to help in choosing good CCDs
+  
+  * Added checks in rsm() for aliased parameters
+
+  * Added NEWS and CITATION files.
+  
+  * Tweaks/corrections/additions to documentation and vignettes.
+  
+
+Changes from version 1.01 over 1.00 (5 December 2008)
+
+  * Added canonical.path function
+  
+  * Modified formula handling in coded.data and relatives so that any
+    legal expression will work (as long as it's linear!)
+  
+  * Overhauled contour.lm, with different argument list.  Now it is much 
+    easier to use, and can produce multiple plots with one call.
+    
+  * Provided a true vignette.  Other improvements to documentation.

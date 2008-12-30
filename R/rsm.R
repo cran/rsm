@@ -73,7 +73,7 @@ rsm = function (..., data) {
     fonm = names(LM$b) = sapply(foterm, as.character)[-1]
     LM$labels = list(FO=list(idx=i.fo, lab=fonm))
     names(LM$coef)[i.fo] = LM$labels
-
+    
     i.twi = grep("TWI\\(", nm)
     if ((k > 1) & (length(i.twi) == k*(k-1)/2)) {
         btwi = LM$coef[i.twi]
@@ -107,11 +107,19 @@ rsm = function (..., data) {
     }
     else if (length(i.pq) > 0)
         warning(paste("PQ() term not usable because it has", length(i.pq), "d.f. instead of", k))
-        
-    if (!missing(data)) 
-        if (inherits(data, "coded.data")) 
-            LM$coding = attr(data, "coding")
-    class(LM) = c("rsm", "lm")
+    
+    if (LM$order==1) 
+        aliased = any(is.na(LM$b))
+    else 
+    	aliased = any(is.na(cbind(LM$B, LM$b)))
+    if (aliased)
+    	warning("Some coefficients are aliased - cannot use 'rsm' methods.\n  Returning an 'lm' object.")
+    else {
+        if (!missing(data)) 
+            if (inherits(data, "coded.data")) 
+                LM$coding = attr(data, "coding")
+        class(LM) = c("rsm", "lm")
+    }
     LM
 }
 

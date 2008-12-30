@@ -7,10 +7,6 @@
 \title{Using the \texttt{rsm} package}
 \author{Russell V.~Lenth\\The University of Iowa}
 
-\begin{Scode}{echo=FALSE, results=hide}
-options(warn=-1)
-\end{Scode}
-
 \begin{document}
 \maketitle
 
@@ -22,19 +18,78 @@ options(warn=-1)
 \section{Overview}
 The "rsm" package provides several useful functions to facilitate 
 response-surface analysis.  The primary one is the "rsm" function itself,
-which is an extension of "lm" but with some enhancements.  In specifying a model in "rsm", the model formula is just like in "lm", ut the response-surface portion of the model is specified using one or more of the special functions "FO" (first-order), "TWI" (two-way interactions), "PQ" (pure quadratic), or "SO" (second-order, an alias for all three of the previous functions, combined).  The "summary" method for "rsm" results includes the usual regression summary (but with the coefficients compactly relabeled), an analysis of variance table with a lack-of-fit test, and additional information depending on the order of the model.
+which is an extension of "lm" but with some enhancements.  In specifying a model in "rsm", the model formula is just like in "lm", but the response-surface portion of the model is specified using one or more of the special functions "FO" (first-order), "TWI" (two-way interactions), "PQ" (pure quadratic), or "SO" (second-order, an alias for all three of the previous functions, combined).  The "summary" method for "rsm" results includes the usual regression summary (but with the coefficients compactly relabeled), an analysis of variance table with a lack-of-fit test, and additional information depending on the order of the model.
 
 An important aspect of response-surface analysis is using an appropriate coding transformation of the data.  The functions "coded.data", "as.coded.data", "decode.data", "code2val", and "val2code" facilitate these transformations; we simply provide formulas for the desired transformations.  If a "coded.data" object is used in place of an ordinary "data.frame" in the call, to "rsm", then appropriate additional output is provided in the "summary" and "steepest" outputs.
 
-Auxiliary functions include "steepest" for finding a path of steepest ascent (for second-order models, this uses ridge analysis); and "contour" for obyaining a contour plot of the response surface.
+Of course, before we get to analysis, we need a good design for collecting the required data.  The functions "ccd" and "bbd" are provided for generating two of the most popular classes of designs---central-composite designs (CCDs) and Box-Behnken designs (BBDs).  In addition, "ccd.pick" allows one to take a quick look at various combinations of choices for CCDs and find the most suitable ones.
 
+Auxiliary functions include "steepest" for finding a path of steepest ascent (for second-order models, this uses ridge analysis); and "contour" for obtaining a contour plot of the response surface.
+
+\section{Generating a design}
+Suppose that you want to experiment on a process with an aim to improving its yield.  You have already done a little bit of preliminary experimentation and have identified five variables that you want to manipulate experimentally.  Our plan is to develop a central-composite design, which consists of some blocks of ``cube'' or factorial points plus center points, and other blocks with ``star'' or axis points, plus center points.  The cube points will be placed at positions $\pm1$ in coded units, and the axis points will be at $\pm\alpha$.  Initially, we will only collect data on one or more of the cube blocks; then, after analyzing these data with a first-order model, we can either proceed to collect data on the other blocks and fit a second-order model, or if the fit is reasonably linear, we may want to forego the extra blocks and instead follow a path of steepest ascent.
+
+There are a lot of choices to be made---how many center points, whether we have replications, whether the cube block(s) are fractional or full factorial, and what $\alpha$ to use.  With response surfaces, it is desirable to have a rotatable design (where the variance of the estimated response depends only on the distance from zero).  On the other hand, a CCD is built in blocks, and it is a good idea to make the block effects independent of the effects needed to estimate the response surface.  To help make good choices, we can run the function "ccd.pick" to explore some possibilities.  Suppose that, for practical reasons, we want no more than $16$ cube points in a block, but we'd also consider ones with only $8$ cube points (e.g., all $2^5=32$ factor combinations dividing into 4 blocks of 8 each).  Since there are $5$ factors, there are $2\times5=10$ axis-point positions, but it might be worth considering replicating the axis points rather than having lots of center points.  And we don't want the total number of runs in the design to be too excessive---say $65$ at most.  
+
+\subsection{Identifying a good design}
+Given these considerations we will run "ccd.pick" to obtain ideas for good designs.  It will compute the $\alpha$ values needed for rotatability and orthogonal blocking for various combinations of numbers of cube points, center points, replications, etc., and show the best few after sorting in a specified order (by default, a measure of how well the two $\alpha$s agree).  Here is a suitable call based on the above discussion:
+\begin{Scode}
+library(rsm)
+ccd.pick(5, n.c=c(8,16), blks.c=c(1,2,4), wbr.s=1:2, restrict="N<=65")
+\end{Scode}
+The first one listed has a total of "N=33" runs; it has "blks.c=1" cube block with "n.c=16" cube points and "n0.c=6" center points; and star block with "n.s=10" axis points ("wbr.s=1" at each position) and "n0.s=1" center point; with these settings, the design is both rotatable and orthogonal if we use $\alpha=2$ for the axis-point positions.  The 63-run design~4 is the only one shown where the axis points are replicated; it has two 16-point cube blocks with 5 center points each, and only one center point, but replicated axis points, in the star block.  This design has the pleasing feature of requiring 21 runs in each block, ad it is both rotatable and orthogonal using $\alpha=2$.  In the remaining designs, there is a slight discrepancy between the $\alpha$s required for rotatability and orthogonality.  Designs 5 and~6 have exactly the same number of runs, and differ only in where there are 2 blocks with 16 cube points or 4 blocks of 8 cube points.  Design~10 has a slightly greater discrepancy between the $\alpha$s than design~6, but fewer total runs.
+
+\subsection{Generating a CCD}
+Suppose that we decide to go with Design~1.  To generate this design, the 16-run cube block is a half-fraction of the full 32-run design in 5 factors.  This can be generated by confounding the main effect of one factor with the 4-way interaction of the others.  I flipped a coin and decided to use the negative of this interaction.  The "ccd" function can generate and randomize the design:
+\begin{Scode}
+ccd(~x1+x2+x3+x4, x5~-x1*x2*x3*x4, n0=c(6,1))
+\end{Scode}
+By default, "ccd" chooses $\alpha$ for orthogonality.  If we want to name the variables "x1,x2,...", we can just give the number of variables instead of a formula in the first argument:
+\begin{Scode}{eval=F}
+ccd(4, x5~-x1*x2*x3*x4, n0=c(6,1))
+\end{Scode}
+
+
+To generate design~4, we use the full 32-run design, but divided into blocks two blocks of 16 runs by confounding the 5-way interaction:
+\begin{Scode}
+des4 = ccd(5, , Block~x1*x2*x3*x4*x5, wbr = c(1,2), n0=c(5,1))
+\end{Scode}
+The "wbr" argument specifies within-block replications for cube blocks and star blocks, respectively.  There is also a "bbr" argument for between-block replications (i.e. additional blocks with the same factor combinations).
+
+The "ccd" call for generating design~5 would be similar to the one above, but no "wbr" argument is needed.  For design~10 (or design~6), we need to block the 32 cube points into four sets of 8, by confounding two effects with blocks:
+\begin{Scode}
+des10 = ccd(5, , Block~c(x1*x2*x3,x3*x4*x5), n0=c(2,4))
+\end{Scode}
+These designs, while having more total runs, may be preferred over design~1 because it is possible to run only one block (10 runs, compared with 22 runs with design~1) and still be able to estimate some first-order effects.
+
+
+Because experimentation can be very expensive, it would be terrible to run the design only to find out you can't estimate all the effects.  For that reason, "ccd" does a check to make sure we can do an analysis:
+\begin{Scode}{eval=F}
+bad.des = ccd(5, , Block~c(x1*x2*x3*x4,x2*x3*x4*x5), n0=c(2,4))
+\end{Scode}
+%%% I have to fake this because Sweave doesn't show warnings
+%%% and R CMD check probably won't like the warning this generates
+\begin{Soutput}
+Warning in ccd(~x1 + x2 + x3 + x4 + x5, , Block ~ c(x1 * x2 * x3 * x4, x2 *  :
+  Some 1st or 2nd-order terms are aliased in the cube portion of this design
+\end{Soutput}
+The problem here is that the generalized interaction between the two effects, $x_1x_2x_3x_4\cdot x_2x_3x_4x_4 = x_1x_5$, is also confounded with blocks.  Actually, by the time center points and axis points are added, $x_1x_5$ is only partially confounded; but this is still not a desirable design.
+
+\subsection{Box-Behnken designs}
+The "bbd" function is provided to generate Box-Behnken designs.  These are fractional $3^k$ designs capable of fitting second-order models.  Advantages are that they sometimes require fewer runs than a CCD, and each factor has only 3 levels instead of 5.  Disadvantages are that they cannot be built-up in blocks like a CCD, and they are not rotatable.  BBDs are available only for 3, 4, 5, 6, and~7 factors; and only 4- and 5-factor designs can be blocked orthogonally.  Here is a BBD for 5 factors (by default, in two blocks)
+\begin{Scode}
+bbd5 = bbd(5, n0=1)
+nrow(bbd5)
+\end{Scode}
+In this case, some CCDs have fewer runs.  However, the size of one block is comparable to that of the first design, and we could use it for first-order analysis.
+
+\clearpage %%%%%%%%%%%%%%%%%%%%%%%%% Manual formatting %%%%%%%%%%%%%%%%%%
 \section{Chemical reactor example}
 The provided dataset "ChemReact" comes from Table~7.7 of Myers and Montgomery (2002).
 \begin{Scode}
-library(rsm)
 ChemReact
 \end{Scode}
-The context is that block "B1" of this data were collected first and analyzed, after which block "B2" was added and a new analysis was done.  Accordingly, we woll illustrate the analysis in two stages.
+The context is that block "B1" of this data were collected first and analyzed, after which block "B2" was added and a new analysis was done.  Accordingly, we will illustrate the analysis in two stages.
 
 \subsection{Coding of predictors}
 First, though, we need to take care of coding issues.  The data are provided in their original units, and the original experiment (block "B1") used factor settings of $\text{Time}=85\pm5$ and $\text{Temp}=175\pm5$, with three center points.  Thus, the coded variables are $x_1 = (\text{Time}-85)/5$ and $x_1 = (\text{Temp}-175)/5$.  Let's create a coded dataset with the appropriate codings.  We do this via formulas:
@@ -91,7 +146,7 @@ This time, the situation is more complicated.  Since the eigenvalues are of mixe
 par (mfrow = c(2, 3))
 contour(heli.rsm, ~x1+x2+x3+x4, at=summary(heli.rsm)$canonical$xs)
 \end{Scode}
-The plots are shown in Figure~\ref{helicon}.
+The plots are shown in Figure~\ref{helicon}.  An important thing to note is that when the color underlay is used (as is the default), the color scale is consistent across all plots, facilitating appropriate visual comparisons.
 \begin{figure}[b]
 \setkeys{Gin}{width=\linewidth}
 \begin{Scode}{fig=TRUE, height=9, width=12, echo=FALSE}
@@ -100,17 +155,19 @@ The plots are shown in Figure~\ref{helicon}.
 \caption{Contour plots for \texttt{heli} data.}\label{helicon}
 \end{figure}
 
-Since we have not found a maximum, our next step might be to experiment in the direction of steepest ascent:
-\begin{Scode}
-steepest (heli.rsm)
-\end{Scode}
-This gives a path that starts at the \emph{origin} in the coded variables.
-An alternative is to explore along a path through the \emph{stationary point}.  The function "canonical.path", by default, returns the path of steepest ascent each direction from the stationary point.  This path is linear.
+Since we have not found a maximum, our next step might be to experiment along some path that seems promising of providing a higher response.  In this particular example, the stationary point is within the experimental region, so we can regard it as reasonably well estimated.  It is thus believable that the actual response function has a saddle point in the vicinity of our stationary point. The function "canonical.path", by default, returns the path of steepest ascent each direction from the stationary point.  This path is linear.
 \begin{Scode}
 canonical.path(heli.rsm)
 \end{Scode}
-These paths match fairly closely in one direction as we proceed outward.  For example, the point at distance $-5$ from "canonical.path" is similar to the one at distance $4$
-from "steepest".
+We should conduct additional experimental runs along this path and see where we get the most improvement in the observed response.
+
+Had the stationary point been more distant, it would be more of an extrapolation from the range of the experiment, and thus it would not be a good starting point for further experimentation.  That is, for a distant stationary point, a steepest-ascent method makes more sense.  For second-order surfaces, the "steepest" function uses ridge analysis to determine an appropriate path:
+\clearpage %%%%%%%%%%%%%%%%%%%%%%%%% Manual formatting %%%%%%%%%%%%%%%%%%
+\begin{Scode}
+steepest (heli.rsm)
+\end{Scode}
+This gives a path that starts at the \emph{origin} in the coded variables, rather than the stationary point.
+
 
 \section{Miscellaneous notes and examples}
 \subsection{Coded data}
@@ -127,6 +184,14 @@ decode.data(dat)
 code2val(c(t = -.5, w = .25),  attr(dat, "codings"))
 \end{Scode}
 
+The design-generation functions "ccd" and "bbd" also support coding:
+\begin{Scode}
+des = bbd(Finish~x1+x2+x3, coding = list(
+  x1~(Time-60)/10, x2~(Feedrate - 2.2)/.4, x3~(Speed-2000)/250))
+des[1:3,]
+decode.data(des[1:3,])
+\end{Scode}
+
 \subsection{Contour plots}
 The "contour" method provided by this package works for any "lm" object, not just response surfaces.  By default, it overlays the contour plot on an image plot
 using terrain colors.  Arguments provide for the image portion to be disabled or the colors changed if desired.
@@ -135,7 +200,7 @@ To make "contour" work, it was necessary to obtain the data used by a "lm" objec
 \begin{Scode}
 model.data (CR.rsm1, lhs = TRUE)
 \end{Scode}
-Note that only the observations in the original "subset" argument are included.
+
 
 
 
@@ -150,7 +215,7 @@ New York: Wiley-Interscience.
 
 \section*{Contact information}
 Russell V. Lenth\\
-Department of Sttaistics\\
+Department of Statistics\\
 The University of Iowa\\
 Iowa City, IA, USA  52242\\
 "russell-lenth@uiowa.edu"

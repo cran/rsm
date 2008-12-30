@@ -9,7 +9,8 @@
 }
 \usage{
 steepest (object, dist = seq(0, 5, by = .5), descent = FALSE)
-canonical.path(object, which = ifelse(descent, length(object$b), 1), dist = seq(-5, 5, by = 0.5), descent = FALSE)
+canonical.path(object, which = ifelse(descent, length(object$b), 1),
+               dist = seq(-5, 5, by = 0.5), descent = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

@@ -44,7 +44,16 @@ loftest (object)
     \item{labels}{Labels for the response-surface terms.  These make the summary much more readable.}
     \item{coding}{Coding formulas, if \code{data} is a \code{\link{coded.data}} object.}
   \code{summary} 
-  is the summary method for \code{rsm} objects.  It shows the regression summary,
+  is the summary method for \code{rsm} objects.  It returns an object of class
+  \code{summary.rsm}, which is an extension of the \code{summary.lm}
+  class with additional list elements:
+    \item{sa}{Unit-length vector of the path of steepest ascent
+      (first-order models only).}
+    \item{canonical}{Canonical analysis (second-order models only).  This is a list with elements \code{xs}, the stationary point, and \code{eigen}, the eigenanalysis
+      of \code{B} (see above).}
+    \item{lof}{ANOVA table including lack-of-fit test.}
+    \item{coding}{Coding formulas in parent \code{rsm} object.}
+  Its \code{print} method shows the regression summary,
   followed by an ANOVA and lack-of-fit test.  For first-order models, it shows the direction of 
   steepest ascent, and for second-order models, it shows the canonical analysis of the
   response surface.  

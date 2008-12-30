@@ -47,9 +47,9 @@
 \seealso{\code{\link{contour}}}
 \examples{
 library (rsm)
-par (mfrow = c (2,3))
 heli.rsm = rsm (ave ~ block + SO(x1, x2, x3, x4), data = heli)
 
+par (mfrow = c (2,3))
 contour (heli.rsm, ~x1+x2+x3+x4, at=summary(heli.rsm)$canonical$xs)
 }
 \keyword{ regression }

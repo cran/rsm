@@ -22,19 +22,22 @@ parse.coding(form)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{data}{A data.frame}
-  \item{\dots}{Formulas of the form \code{x ~ (var - ctr) / scal}, where 
-  \code{x} is the name of the coded variable,
-  \code{var} is the name of the variable on its original scale,
-  \code{ctr} is the value to be coded as \code{x = 0}, and
-  \code{scal} is the distance to 1 on the coded scale.
-  These formulas should be separated by commas.
-  }
+  \item{\dots}{Formulas for producing coded variables.}
   \item{formulas}{Provides an alternative way to provide the coding formulas.
   This is useful if you want to retrieve the codings from one dataset and use them for another.}
   \item{X}{A vector, matrix, or data.frame to be coded or decoded.}
   \item{codings}{a list of formulas (see \code{form})}
-  \item{x}{Coded dataset to be printet.}
+  \item{x}{Coded dataset to be printed.}
   \item{form}{A formula as described above for \code{\dots}}
+}
+\details{
+  Typically, coding formulas are of the form \code{x ~ (var - center) / div} 
+  where \code{x} and \code{var} are variable names, and \code{center} and \code{div} are numbers.  
+  The left-hand side gives the name of the coded variable, and the right-hand side 
+  should be a linear expression in  the uncoded variable.  This expression is evaluated at
+  variable values of 0 and 1, then the results are used to
+  solve for the scale center and divisor.  These results are rounded to 4 digits
+  to help ensure that zeros come out exactly.
 }
 \value{
   \code{coded.data} and \code{as.coded.data} return an object of class \code{coded.data},
@@ -59,8 +62,10 @@ parse.coding(form)
   coded or uncoded variables.
   
   \code{parse.coding} is mostly for internal use; it extracts and returns a \code{list} with two vectors:
-  a character vector \code{names} with the two variable names, and a numeric vector with the center and divisor.
+  a character vector \code{names} with the two variable names, 
+  and a numeric vector \code{const} with the center and divisor.
 }
+
 \seealso{\code{\link{data.frame}}}
 \author{Russell V. Lenth}
 \examples{

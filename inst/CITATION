@@ -1,0 +1,18 @@
+citHeader("To cite package 'rsm' in publications use:")
+     
+desc <- packageDescription("rsm")
+year <- sub(".*(2[[:digit:]]{3})-.*", "\\1", desc$Date)
+vers <- paste("R package version", desc$Version)
+     
+citEntry(entry="Manual",
+      title = "rsm: Response-Surface Analysis",
+      author = personList(as.person("Russell V. Lenth")),
+      year = year,
+      note = vers,
+
+      textVersion =
+      paste("Russell V. Lenth (",
+	    year,
+	    "). rsm: Response-Surface Analysis. ",
+	    vers, ".", sep=""))
+
