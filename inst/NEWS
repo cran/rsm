@@ -1,5 +1,13 @@
 NEWS for rsm package
 
+Changes in version 1.11
+
+  * Changed last variable name to 'logSD' in 'heli' and clarified 
+    documentation for that dataset
+    
+  * Fixed bug in contour.lm relating to original use of model formula,
+    e.g. it now works with for model fitted by 'lm(swiss)'
+
 Changes from version 1.10 over 1.01
 
   * Added functions ccd() and bbd() for generating RS designs

@@ -208,7 +208,7 @@ model.data (CR.rsm1, lhs = TRUE)
 \begin{description}
 \item Box, G.E.P., Hunter, J.S., and Hunter, W.G. (2005),
 \emph{Statistics for Experimenters: Design, Innovation, and Discovery} (2nd ed.), New York: Wiley-Interscience.
-\item Myers, R. H. and Montgomery, D. C. (2002), \emph{Response Surface Mehodology:
+\item Myers, R. H. and Montgomery, D. C. (2002), \emph{Response Surface Methodology:
 Process and Product Optimization Using Designed Experiments} (2nd ed.),
 New York: Wiley-Interscience.
 \end{description}

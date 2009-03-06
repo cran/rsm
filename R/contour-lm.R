@@ -2,10 +2,15 @@
 ### returns it as a data.frame
 
 model.data = function (lmobj, lhs=FALSE) {
+    form = lmobj$call$formula
+    if (is.name(form)) {
+        lmobj$call$data = form
+        form = formula(lmobj)
+    }
     if (lhs)
-        nm = all.vars((lmobj$call$formula))
+        nm = all.vars(form)
     else
-        nm = all.vars((lmobj$call$formula)[[3]])
+        nm = all.vars(form[[3]])
     form = as.formula(paste("~", paste(nm, collapse = "+")))
     model.frame(form, eval(lmobj$call$data), subset = eval(lmobj$call$subset))
 }

@@ -1,6 +1,6 @@
 Package: rsm
-Version: 1.10
-Date: 2008-12-30
+Version: 1.11
+Date: 2009-03-06
 Title: Response-surface analysis
 Author: Russell V. Lenth
 Maintainer: Russell V Lenth <russell-lenth@uiowa.edu>
@@ -12,4 +12,4 @@ Description: Provides functions to
 License: GPL-2
 LazyLoad: yes
 LazyData: yes
-Packaged: Tue Dec 30 12:41:59 2008; rlenth
+Packaged: Fri Mar  6 12:26:16 2009; rlenth
