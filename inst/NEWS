@@ -1,5 +1,9 @@
 NEWS for rsm package
 
+Changes in version 1.12
+
+  * Modified CITATION file to conform to standards
+
 Changes in version 1.11
 
   * Changed last variable name to 'logSD' in 'heli' and clarified 
