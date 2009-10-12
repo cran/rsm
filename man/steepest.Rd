@@ -29,7 +29,7 @@ canonical.path(object, which = ifelse(descent, length(object$b), 1),
   \code{canonical.path} applies only to second-order models (at least a \code{TWI} term present).  It determines a linear path along one of the canonical variables, originating at the stationary point (not the origin).  We need to specify which canonical variable to use.
   The eigenvalues obtained in the canaonical analysis are always in decreasing order, so the first canonical direction will be the path of steepest ascent (or slowest descent, if all eigenvalues are negative) from the stationary point, and the last one will be the path of steepest descent (or slowest ascent, if all eigenvalues are positive).  These are the defaults for \code{which} when \code{descent=FALSE} and \code{descent=TRUE} respectively.
   
-  With either function, the path in uncoded units depends on how the data are coded.  Accordingly, it is important to code the predictor variables appropriately before fitting the response-surface model.  See \code{\ref{coded.data}} and its relatives for more information.
+  With either function, the path in uncoded units depends on how the data are coded.  Accordingly, it is important to code the predictor variables appropriately before fitting the response-surface model.  See \code{\link{coded.data}} and its relatives for more information.
 }
 \value{
   A \code{data.frame} of points along the path of steepest ascent (or descent).
