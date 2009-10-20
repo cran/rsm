@@ -1,5 +1,5 @@
 Package: rsm
-Version: 1.20
+Version: 1.21
 Date: 2009-10-20
 Title: Response-surface analysis
 Author: Russell V. Lenth
@@ -11,6 +11,6 @@ Description: Provides functions to generate response-surface designs,
 License: GPL-2
 LazyLoad: yes
 LazyData: yes
-Packaged: 2009-10-20 21:28:49 UTC; zeileis
+Packaged: 2009-10-30 15:51:14 UTC; rlenth
 Repository: CRAN
-Date/Publication: 2009-10-20 21:30:28
+Date/Publication: 2009-10-30 16:08:14

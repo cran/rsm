@@ -95,7 +95,7 @@ contour.lm = function(x, form, at, bounds, zlim,
   
   if (missing (zlim)) zlim = z.rng
   
-  ### Do then plots with a common image scale
+  ### Then do plots with a common image scale
   for (i in 1:length(form)) {
     v = all.vars(form[[i]])
     x = bounds[[v[2]]]
@@ -106,7 +106,7 @@ contour.lm = function(x, form, at, bounds, zlim,
       contour(x, y, z, add=TRUE, ...)
     }
     else {
-      contour(x, y, z, ,xlab = v[1], ylab = v[2], ...)
+      contour(x, y, z, ylab = v[1], xlab = v[2], ...)
     }
   }
 }

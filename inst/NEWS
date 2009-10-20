@@ -1,5 +1,11 @@
 NEWS for rsm package
 
+Changes in version 1.21 (October 30, 2009)
+
+  * Bug fix in contour.lm (axis labeling was reversed whern image=FALSE)
+    Thanks to Eduard Sturm for reporting this
+  
+
 Changes in version 1.20 (October 20, 2009)
 
   * Replaced citation to point to paper published in JSS
@@ -7,12 +13,12 @@ Changes in version 1.20 (October 20, 2009)
   * Replaced vignette by JSS article
 
 
-Changes in version 1.13 (12 October, 2009 -- COLUMBUS DAY)
+Changes in version 1.13 (12 October, 2009)
 
   * Fixed one misused macro in documentation
 
 
-Changes in version 1.12 (5 May, 2009 -- CINCO DE MAYO)
+Changes in version 1.12 (5 May, 2009)
 
   * Modified CITATION file to conform to standards
 
