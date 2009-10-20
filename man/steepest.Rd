@@ -40,8 +40,14 @@ canonical.path(object, which = ifelse(descent, length(object$b), 1),
   For first-order response surfaces, only \code{steepest} may be used; the path is linear in that case.  
   For second-order surfaces, \code{steepest} uses ridge analysis, and the path may be curved.  
 }
-\references{Draper, NR (1963), ``Ridge analysis of response surfaces'',
-  \emph{Technometrics}, 5, 469--479.}
+\references{
+Draper, NR (1963), ``Ridge analysis of response surfaces'',
+  \emph{Technometrics}, 5, 469--479.
+
+Lenth RV (2009). ``Response-Surface Methods in R, Using rsm'', 
+  \emph{Journal of Statistical Software}, 32(7), 1--17. 
+  \url{http://www.jstatsoft.org/v32/i07/.}
+}
 \author{Russell V. Lenth}
 \note{
   Take careful note of the fitted values along the outputted path (labeled \code{yhat}).  For example, if the stationary point is a maximum 

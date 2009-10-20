@@ -54,6 +54,11 @@ PE (...)
   PureError.lm = update (ChemReact.lm, . ~ PE(Time,Temp))
   anova (ChemReact.lm, PureError.lm)
 }
+\references{
+Lenth RV (2009). ``Response-Surface Methods in R, Using rsm'', 
+  \emph{Journal of Statistical Software}, 32(7), 1--17. 
+  \url{http://www.jstatsoft.org/v32/i07/.}
+}
 \author{Russ Lenth}
 \seealso{\code{\link{rsm}}}
 \keyword{regression}

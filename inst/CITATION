@@ -1,20 +1,19 @@
-citHeader("To cite package 'rsm' in publications use:")
-     
-if(!exists("meta") || is.null(meta)) meta <- packageDescription("rsm")
-year <- sub(".*(2[[:digit:]]{3})-.*", "\\1", meta$Date)
-vers <- paste("R package version", meta$Version)
-url = "http://CRAN.R-project.org/package=rsm"
-     
-citEntry(entry="Manual",
-      title = "rsm: Response-Surface Analysis",
-      author = personList(as.person("Russell V. Lenth")),
-      year = year,
-      note = vers,
-      url = url,
+citHeader("To cite rsm in publications use:")
 
-      textVersion =
-      paste("Russell V. Lenth (",
-	    year,
-	    "). rsm: Response-Surface Analysis. ",
-	    vers, ". ", url, sep=""))
+citEntry(entry = "Article",
+  title        = "Response-Surface Methods in {R}, Using {rsm}",
+  author       = personList(as.person("Russell V. Lenth")),
+  journal      = "Journal of Statistical Software",
+  year         = "2009",
+  volume       = "32",
+  number       = "7",
+  pages        = "1--17",
+  url          = "http://www.jstatsoft.org/v32/i07/",
+
+  textVersion  =
+  paste("Russell V. Lenth (2009).",
+        "Response-Surface Methods in R, Using rsm.",
+        "Journal of Statistical Software, 32(7), 1-17.",
+        "URL http://www.jstatsoft.org/v32/i07/.")
+)
 

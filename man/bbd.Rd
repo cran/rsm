@@ -28,7 +28,12 @@ A \code{\link{data.frame}} with the generated design; or if \code{coding} is spe
 \note{
   To avoid aliasing the pure-quadratic terms, you must use a positive value \code{n0}.
 }
-\references{Meyers, RH and Montgomery, DC (2002), 
+\references{
+Lenth RV (2009). ``Response-Surface Methods in R, Using rsm'', 
+  \emph{Journal of Statistical Software}, 32(7), 1--17. 
+  \url{http://www.jstatsoft.org/v32/i07/.}
+
+Meyers, RH and Montgomery, DC (2002), 
 \emph{Response Surface Methodology} (2nd ed.), Wiley-Interscience.
 }
 \author{Russell V. Lenth}

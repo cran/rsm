@@ -39,6 +39,10 @@ A couple of convenience features are added.  If \code{basis} is an integer inste
 A \code{\link{data.frame}} with the generated design; or if \code{coding} is specified, a \code{\link{coded.data}} object.  The blocking variable will be a \code{\link{factor}}; all other variables will be numeric.
 }
 \references{
+Lenth RV (2009). ``Response-Surface Methods in R, Using rsm'', 
+  \emph{Journal of Statistical Software}, 32(7), 1--17. 
+  \url{http://www.jstatsoft.org/v32/i07/.}
+
 Meyers, RH and Montgomery, DC (2002), 
 \emph{Response Surface Methodology} (2nd ed.), Wiley-Interscience.
 }

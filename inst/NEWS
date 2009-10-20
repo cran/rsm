@@ -1,10 +1,23 @@
 NEWS for rsm package
 
-Changes in version 1.12
+Changes in version 1.20 (October 20, 2009)
+
+  * Replaced citation to point to paper published in JSS
+  
+  * Replaced vignette by JSS article
+
+
+Changes in version 1.13 (12 October, 2009 -- COLUMBUS DAY)
+
+  * Fixed one misused macro in documentation
+
+
+Changes in version 1.12 (5 May, 2009 -- CINCO DE MAYO)
 
   * Modified CITATION file to conform to standards
 
-Changes in version 1.11
+
+Changes in version 1.11 (6 March, 2009)
 
   * Changed last variable name to 'logSD' in 'heli' and clarified 
     documentation for that dataset
@@ -12,7 +25,8 @@ Changes in version 1.11
   * Fixed bug in contour.lm relating to original use of model formula,
     e.g. it now works with for model fitted by 'lm(swiss)'
 
-Changes from version 1.10 over 1.01
+
+Changes from version 1.10 (30 December, 2008)
 
   * Added functions ccd() and bbd() for generating RS designs
   
@@ -25,7 +39,7 @@ Changes from version 1.10 over 1.01
   * Tweaks/corrections/additions to documentation and vignettes.
   
 
-Changes from version 1.01 over 1.00 (5 December 2008)
+Changes from version 1.01 (5 December 2008)
 
   * Added canonical.path function
   
