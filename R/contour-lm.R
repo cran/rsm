@@ -1,4 +1,4 @@
-### reconstructs the data set used in a linear model, and
+### Reconstructs the data set used in a linear model, and
 ### returns it as a data.frame
 
 model.data = function (lmobj, lhs=FALSE) {
@@ -16,13 +16,12 @@ model.data = function (lmobj, lhs=FALSE) {
 }
 
 
-
 ### contour plot(s) for a lm
-contour.lm = function(x, form, at, bounds, zlim,
-    image=TRUE, img.col=terrain.colors(50), ...) 
+contour.lm = function(x, form, at, bounds, zlim, 
+    xlabs, hook, plot.it=TRUE, # args added Dec 09
+    image=FALSE, img.col=terrain.colors(50), ...) 
 {
   lmobj = x   # generic wants it named 'x', I don't!
-  
   
   data = model.data(lmobj)
   
@@ -52,6 +51,13 @@ contour.lm = function(x, form, at, bounds, zlim,
         }
     }
   }
+  vars = sort(unique(as.character(sapply(form, all.vars))))
+  if (missing(xlabs) && inherits(lmobj, "rsm")) {
+    forms = codings(lmobj)
+    if (!is.null(forms))
+      xlabs = sapply(vars, function(v) paste(as.character(forms[[v]][2:3]), collapse=" = "))
+  }   
+  else if (missing(xlabs)) xlabs = vars
 
   # gather 'at' info
   tmp = lapply(data, function(var) {
@@ -78,6 +84,7 @@ contour.lm = function(x, form, at, bounds, zlim,
   
   ### Accumulate the z values
   plot.data = list()
+  lbls = rep("", length(form))
   z.rng = NULL
   for (i in 1:length(form)) {
     AT = at
@@ -88,27 +95,153 @@ contour.lm = function(x, form, at, bounds, zlim,
     newdata = do.call(expand.grid, AT)
     ord = order(newdata[[v[1]]], newdata[[v[2]]])
     newdata = newdata[ord, ]
-    ###z = matrix (predict (lmobj, newdata = newdata), nrow = length(x))
-    z = plot.data[[i]] =  predict (lmobj, newdata = newdata)
+    z = predict (lmobj, newdata = newdata)
     z.rng = range (c (z.rng, z))
+    if (!missing(zlim)) {
+      z[z > zlim[2]] = NA
+      z[z < zlim[1]] = NA
+    }
+    vnames = c(x=v[2], y=v[1])
+    labs = c(xlabs[sapply(vnames, charmatch, vars)], vnames)
+    plot.data[[i]] = list(x=x, y=y, 
+      z=matrix(z, nrow=length(x)), labs=labs)
+    lbls[i] = paste(labs[3], labs[4], sep=" ~ ")
   }
+  names(plot.data) = lbls
   
   if (missing (zlim)) zlim = z.rng
+  for (i in 1:length(lbls))
+    plot.data[[i]]$zlim = zlim
   
-  ### Then do plots with a common image scale
-  for (i in 1:length(form)) {
-    v = all.vars(form[[i]])
-    x = bounds[[v[2]]]
-    y = bounds[[v[1]]]
-    z = matrix (plot.data[[i]], nrow = length (x))
+  ### If plots requested, do plots with a common image scale
+  if (plot.it) for (i in 1:length(form)) {
+    dat = plot.data[[i]]
+    if (!missing(hook))
+      if (!is.null(hook$pre.plot)) hook$pre.plot(dat$labs)
     if (image) {
-      image(x, y, z, col=img.col, xlab = v[2], ylab = v[1], zlim = zlim, ...)
-      contour(x, y, z, add=TRUE, ...)
+      image(dat$x, dat$y, dat$z, col=img.col, 
+        xlab = dat$labs[1], ylab = dat$labs[2], zlim = dat$zlim, ...)
+      contour(dat$x, dat$y, dat$z, add=TRUE, ...)
     }
     else {
-      contour(x, y, z, ylab = v[1], xlab = v[2], ...)
+      contour(dat$x, dat$y, dat$z, 
+        xlab = dat$labs[1], ylab = dat$labs[2], ...)
     }
+    if (!missing(hook))
+      if (!is.null(hook$post.plot)) hook$post.plot(dat$labs)
   }
+  
+  invisible(plot.data)
 }
 
 
+# Image plot for a lm
+image.lm = function(x, form, at, bounds, zlim, xlabs, hook,  ...)  {
+  plot.data = contour.lm(x, form, at, bounds, zlim, xlabs, plot.it=FALSE)
+  for (i in 1:length(plot.data)) {
+    dat = plot.data[[i]]
+    if (!missing(hook))
+      if (!is.null(hook$pre.plot)) hook$pre.plot(dat$labs)
+    
+    image(dat$x, dat$y, dat$z, 
+        xlab = dat$labs[1], ylab = dat$labs[2], zlim = dat$zlim, ...)
+    
+    if (!missing(hook))
+      if (!is.null(hook$post.plot)) hook$post.plot(dat$labs)
+  }
+  
+  invisible(plot.data)
+}
+
+
+# Perspective plot(s) for 'lm' objects
+# arg notes:
+# col: facet colors; if null, default, else color pallette based on z value
+# contours: if TRUE, black contours.  Can also be a list with elements
+#   z="bottom" (or "top" or value), col="black", lwd=1
+persp.lm = function(x, form, at, bounds, zlim, zlab, 
+    xlabs, col = "white", contours=NULL, hook,
+    theta = -25, phi = 20, r = 4, border=NULL, box=TRUE, ticktype = "detailed", 
+    ...) 
+{
+  draw.cont.line = function(line) {
+    if (cont.varycol) {
+      cont.col = col
+      if (length(col) > 1) cont.col = col[cut(c(line$level, dat$zlim), length(col))][1]
+    }
+    lines(trans3d(line$x, line$y, cont.z, transf),
+      col=cont.col, lwd=cont.lwd)
+  }
+  plot.data = contour.lm(x, form, at, bounds, zlim, xlabs, plot.it=FALSE)
+  transf = list()
+  if (missing(zlab)) zlab = ""
+  
+  facet.col = col
+
+  cont = !is.null(contours)
+  if (mode(contours) == "logical") cont = contours
+  cont.first = cont
+  cont.z = cz = plot.data[[1]]$zlim[1]
+  cont.col = 1
+  cont.varycol = FALSE
+  cont.lwd = 1
+  if (is.character(contours)) {
+    idx = charmatch(contours, c("top","bottom", "colors"), 0)
+    if (idx == 1) {
+      cont.first = FALSE
+      cont.z = plot.data[[1]]$zlim[2]
+    }
+    else if (idx == 2) {}
+    else if (idx == 3) {
+      cont.varycol = TRUE
+      if (length(col) < 2) col = rainbow(40)
+    }
+    else
+      cont.col = contours
+  }
+  else if (is.list(contours)) {
+    if(!is.null(contours$z)) cz = contours$z
+    if (is.numeric(cz)) cont.z = cz
+    else if (cz=="top") {
+      cont.first = FALSE
+      cont.z = plot.data[[1]]$zlim[2]
+    }
+    if(!is.null(contours$col)) cont.col = contours$col
+    if(!is.null(contours$lwd)) cont.lwd = contours$lwd
+    if(charmatch(cont.col, "colors", 0) == 1) {
+      cont.varycol = TRUE
+      if (length(col) < 2) col = rainbow(40)
+    }
+  }
+  
+  # Loop through the plots
+  for (i in 1:length(plot.data)) {
+    dat = plot.data[[i]]
+    cont.lines = NULL
+    if (!missing(hook))
+      if (!is.null(hook$pre.plot)) hook$pre.plot(dat$labs)
+    if (cont) cont.lines = contourLines(dat$x, dat$y, dat$z)
+    if (cont && cont.first) {
+      transf = persp(dat$x, dat$y, dat$z, zlim=dat$zlim, theta=theta, phi=phi, r=r, col = NA, border=NA, box=FALSE, ...)
+      lapply(cont.lines, draw.cont.line)
+      par(new=TRUE)
+    }
+    if (length(col) > 1) {
+      nrz = nrow(dat$z)
+      ncz = ncol(dat$z)
+      zfacet = dat$z[-1,-1] + dat$z[-1,-ncz] + dat$z[-nrz,-1] + dat$z[-nrz,-ncz]
+      zfacet = c(zfacet/4, dat$zlim)
+      facet.col = cut(zfacet, length(col))
+      facet.col = col[facet.col]
+    }
+    transf = persp(dat$x, dat$y, dat$z,
+      xlab=dat$labs[1], ylab=dat$labs[2], zlab=zlab,
+      zlim=dat$zlim, col=facet.col, border=border, box=box, theta=theta, phi=phi, r=r, ticktype=ticktype, ...)
+    if (cont && !cont.first)
+      lapply(cont.lines, draw.cont.line)
+    if (!missing(hook))
+      if (!is.null(hook$post.plot)) hook$post.plot(dat$labs)
+    plot.data[[i]]$transf = transf
+  }
+  invisible(plot.data)
+}

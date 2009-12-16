@@ -24,17 +24,19 @@ function may be used to obtain the direction of steepest ascent (or descent).
 response surfaces.
 
 In RSM methods, appropriate coding of data is
-important not only for nyumerical stability, but for proper scaling
+important not only for numerical stability, but for proper scaling
 of results; the function \code{\link{coded.data}} and its relatives facilitate
 this coding requirement.  
 
-Finally, two more functions are provided that may be useful beyond response-surface applications.  
-\code{\link{contour.lm}} aids in visualizing a response surface, 
+Finally, a few more functions are provided that may be useful beyond response-surface applications.  
+\code{\link{contour.lm}}, \code{\link{persp.lm}}, and \code{\link{image.lm}} aids in visualizing a response surface, 
 or of any other \code{lm} object where a surface is fitted.  \code{\link{model.data}}
 recovers the data used in a \code{lm} call, but unlike \code{model.frame}, no
 polynomials, factors, etc. are expanded.
 
-For more information and examples, use \code{vignette("rsm")}
+For more information and examples, use \code{vignette("rsm")}.  
+Additionally, \code{vignette("rsm-plots")} provides some illustrations 
+of the graphics functions.
 }
 \author{
 Russell V. Lenth
@@ -49,8 +51,8 @@ Lenth RV (2009). ``Response-Surface Methods in R, Using rsm'',
   \emph{Journal of Statistical Software}, 32(7), 1--17. 
   \url{http://www.jstatsoft.org/v32/i07/.}
 
-Meyers, RH and Montgomery, DC (2002), 
-\emph{Response Surface Methodology} (2nd ed.), Wiley-Interscience.
+Myers, RH, Montgomery, DC, and Anderson-Cook, CM (2009), 
+\emph{Response Surface Methodology} (3rd ed.), Wiley.
 }
 \keyword{ package }
 \keyword{ regression }

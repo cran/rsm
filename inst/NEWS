@@ -1,5 +1,25 @@
 NEWS for rsm package
 
+Changes in version 1.30 (December 16, 2009)
+
+  * Enhanced contour.lm with hooks and improved axis labeling
+    Also changed default to image=FALSE -- seems more "pure"
+  
+  * Added persp.lm for perspective plots akin to contour.lm
+  
+  * Added image.lm for image-only plots akin to contour.lm
+  
+  * Added 'codings' methods for coded.data and rsm objects
+  
+  * Added 'canonical' method for rsm for more convenient access
+  
+  * Updated references to 3rd ed. of Myers, Montgomery, Anderson-Cook
+    (also corrected misspelling of Myers -- my apologies to Ray.)
+  
+  * Additional vignette "rsm-plots" describing contour, image, persp
+    in more detail
+
+
 Changes in version 1.21 (October 30, 2009)
 
   * Bug fix in contour.lm (axis labeling was reversed whern image=FALSE)

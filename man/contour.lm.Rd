@@ -1,12 +1,21 @@
 \name{contour.lm}
 \alias{contour.lm}
-\title{Contour plot(s) of a fitted linear model}
+\alias{image.lm}
+\alias{persp.lm}
+\title{Surface plot(s) of a fitted linear model}
 \description{
-  \code{contour} method that will work with any \code{lm} object involving two or
-  more numerical predictors.
+  \code{contour} and \code{persp} methods that will work with any \code{lm} object 
+  involving two or more numerical predictors.
 }
 \usage{
-\method{contour}{lm}(x, form, at, bounds, zlim, image = TRUE, img.col = terrain.colors(50), ...)
+\method{contour}{lm}(x, form, at, bounds, zlim, xlabs, hook, 
+  plot.it=TRUE, image=FALSE, img.col=terrain.colors(50), ...)
+
+\method{image}{lm}(x, form, at, bounds, zlim, xlabs, hook,  ...)
+
+\method{persp}{lm}(x, form, at, bounds, zlim, zlab, xlabs, col = "white", 
+  contours = NULL, hook, theta = -25, phi = 20, r = 4, 
+  border = NULL, box = TRUE, ticktype = "detailed", ...) 
 }
 \arguments{
   \item{x}{A \code{lm} object.}
@@ -18,9 +27,20 @@
     the variables having the same names.  See details.}
   \item{zlim}{Optional \code{zlim} setting passed to \code{\link{image}}.
     If not provided, the range of values across all plotted surfaces is used.}
-  \item{image}{Set to \code{TRUE} if you want an image plot underneath the contours.}
+  \item{zlab}{Optional label for the vertical axis.}
+  \item{xlabs}{Alternate labels for predictor axes (see Details).}
+  \item{hook}{Optional list that can contain functions \code{pre.plot} and \code{post.plot}.  
+    May be used to add annotations or to re-route the graphs to separate files (see Details).}
+  \item{image}{Set to \code{TRUE} if you want an image plot overlaid by contours.}
   \item{img.col}{Color map to use when \code{image=TRUE}.}
-  \item{\dots}{Additional arguments passed to \code{\link{contour}}.}
+  \item{plot.it}{If \code{TRUE}, no plot is produced, just the return value.}
+  \item{col}{Color or colors used for facets in the perspective plot (see details).}
+  \item{contours}{If non-\code{NULL}, specifications for added contour lines in perspective plot.}
+  \item{theta, phi}{Viewing angles passed to \code{\link{persp}} (different defaults).}
+  \item{r}{Viewing distance passed to \code{\link{persp}} (different default).}
+  \item{border, box}{Options passed to \code{\link{persp}}.}
+  \item{ticktype}{Option passed to \code{\link{persp}} (different default).}
+  \item{\dots}{Additional arguments passed to \code{\link{contour}} or \code{\link{persp}}.}
 }
 \details{
   \code{form} may be a single formula or a list of formulas.  A simple formula like
@@ -42,6 +62,42 @@
   as the range, and the third as the number of grid points.
   If it is a vector of length 4 or more, those
   values are used directly as the grid values.
+  
+  By default, the predictor axes are labeled using the variable names in \code{form},
+  unless \code{x} is an \code{\link{rsm}} object, in which case the variable-coding formulas,
+  if present, are used to generate axis labels.
+  These labels are replaced by the entries in \code{xlabs} if provided.  One must be careful using this
+  to make sure that the names are mapped correctly.  The entries in \code{xlabs}
+  should match the respective unique variable names in \code{form}, after sorting them in 
+  (case-insensitive) alphabetical order.  Note that if \code{form} is changed, it may also
+  be necessary to change \code{xlabs}.
+  
+  In \code{persp}, contour lines may be added via the \code{contours} argument.  It may be a boolean or character value, or a \code{list}.
+  If boolean and \code{TRUE}, default black contour lines are added to the bottom surface of the box.  Character values of \code{"top"}, \code{"bottom"}
+  add black contour lines to the specified surface of the box.  \code{contours = "colors"} puts contour lines on the bottom using the same colors as those 
+  at the same height on the surface.  Other character values of \code{contours} are taken to be the desired color of the contour lines, plotted at the bottom.
+  If \code{contours} is a \code{list}, its elements (all are optional) are used as follows:
+  \describe{
+    \item{\code{z}}{Height where the contour lines are plotted.  May be \code{"bottom"} (default), \code{"top"}, or a numeric value.}
+    \item{\code{col}}{Color of the lines.  If not specified, they will be black.  
+      May be integer color values, color names, or \code{"colors"} to match the surface colors.}
+    \item{\code{lwd}}{Line width; default is 1.}
+  }
+  
+  Since these functions often produce several plots, the \code{hook} argument is provided if special setups or annotations are needed for each plot.  It
+  should be a list that defines one or both of the functions \code{pre.plot} and \code{post.plot}.  Both of these functions have one argument, the character 
+  vector \code{labs} for that plot (see Value documentation).
+  
+  Additional examples and discussion of these plotting functions is available via \code{vignette("rsm-plots")}.
+}
+\value{
+  A \code{list} containing information that is plotted.  
+  Each list item is itself a \code{list} with the following components:
+  \item{x, y}{The values used for the x and y axes}
+  \item{z}{The matrix of fitted response values}
+  \item{labs}{Character vector of length 4: Elements 1 and 2 are the x and y axis labels, and elements 3 and 4 are their original variable names}
+  \item{zlim}{The computed or provided \code{zlim} values}
+  \item{transf}{(\code{persp} only) The 3D transformation for \code{\link{trans3d}}}
 }
 \references{
 Lenth RV (2009). ``Response-Surface Methods in R, Using rsm'', 
@@ -54,8 +110,48 @@ Lenth RV (2009). ``Response-Surface Methods in R, Using rsm'',
 library (rsm)
 heli.rsm = rsm (ave ~ block + SO(x1, x2, x3, x4), data = heli)
 
+# Plain contour plots
 par (mfrow = c (2,3))
-contour (heli.rsm, ~x1+x2+x3+x4, at=summary(heli.rsm)$canonical$xs)
+contour (heli.rsm, ~x1+x2+x3+x4, at=canonical(heli.rsm)$xs)
+
+# Same with image overlay and extra annotations showing 
+# stationary point and "at" values
+# Demonstrates use of 'hook' argument
+xs = canonical(heli.rsm)$xs
+myhook = list()
+myhook$post.plot = function(lab) {
+  idx = sapply(lab[3:4], grep, names(xs))
+  points (xs[idx[1]], xs[idx[2]], pch=2, col="red")
+  main = paste("Predicted response versus", lab[3], "and", lab[4])  
+  atlabs = paste(names(xs[-idx]), round(xs[-idx], 3), sep = " = ")
+  atlabs = paste(atlabs, collapse = ", ")
+  title(c(main, paste("at", atlabs)))
+}
+contour (heli.rsm, ~x1+x2+x3+x4, at=xs, hook=myhook, image=TRUE)
+
+# Default perspective views
+persp (heli.rsm, ~x1+x2+x3+x4, at=canonical(heli.rsm)$xs)
+
+# Same plots, souped-up with facet coloring and axis labeling
+persp (heli.rsm, ~x1+x2+x3+x4, contours="col", col=rainbow(40), at=canonical(heli.rsm)$xs,
+  xlabs = c("Wing area", "Wing length", "Body width", "Body length"), zlab = "Flight time")
+  
+\dontrun{
+### Hints for creating graphics files for use in publications...
+
+# Save perspective plots in one PDF file (will be six pages long)
+pdf(file = "heli-plots.pdf")
+persp (heli.rsm, ~x1+x2+x3+x4, at=canonical(heli.rsm)$xs)
+dev.off()
+
+# Save perspective plots in six separate PNG files
+png.hook = list()
+png.hook$pre.plot = function(lab) 
+    png(file = paste(lab[3], lab[4], ".png", sep = ""))
+png.hook$post.plot = function(lab)
+    dev.off()
+persp (heli.rsm, ~x1+x2+x3+x4, at=canonical(heli.rsm)$xs, hook = png.hook)
+} %--- end of dontrun
 }
 \keyword{ regression }
 \keyword{ hplot }

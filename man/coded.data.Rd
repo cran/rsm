@@ -6,6 +6,8 @@
 \alias{code2val}
 \alias{print.coded.data}
 \alias{parse.coding}
+\alias{codings}
+\alias{codings.coded.data}
 \title{Functions for coded data}
 \description{
   These functions facilitate the use of coded data in response-surface analysis.
@@ -13,13 +15,17 @@
 \usage{
 coded.data(data, ..., formulas = list(...))
 as.coded.data(data, ..., formulas = list(...))
+
 decode.data(data)
 val2code(X, codings)
 code2val(X, codings)
+
 \method{print}{coded.data}(x, ...)
+
+codings(object)
+\method{codings}{coded.data}(object)
 parse.coding(form)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{data}{A data.frame}
   \item{\dots}{Formulas for producing coded variables.}
@@ -29,6 +35,7 @@ parse.coding(form)
   \item{codings}{a list of formulas (see \code{form})}
   \item{x}{Coded dataset to be printed.}
   \item{form}{A formula as described above for \code{\dots}}
+  \item{object}{An object that contains coding formulas}
 }
 \details{
   Typically, coding formulas are of the form \code{x ~ (var - center) / div} 
@@ -64,6 +71,9 @@ parse.coding(form)
   \code{parse.coding} is mostly for internal use; it extracts and returns a \code{list} with two vectors:
   a character vector \code{names} with the two variable names, 
   and a numeric vector \code{const} with the center and divisor.
+  
+  \code{codings} is a generic function for accessing codings.  \code{codings.coded.data} returns the 
+  list of coding formulas from a \code{coded.data} object.  See also \code{\link{codings.rsm}}.
 }
 
 \seealso{\code{\link{data.frame}}}
@@ -80,6 +90,6 @@ CR = coded.data (ChemReact, x1~(Time-85)/5, x2~(Temp-175)/5)
 CR
 decode.data (CR)  ### will be same as ChemReact
 
-code2val (c(x1=.5, x2=-1), codings = attr(CR, "codings"))
+code2val (c(x1=.5, x2=-1), codings = codings(CR))
 }
 \keyword{regression}

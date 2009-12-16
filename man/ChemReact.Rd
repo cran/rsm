@@ -19,7 +19,8 @@
   }
 }
 \source{
-  Table 7.7 of Myers, RH and Montgomery, DC (2002), \emph{Response Surfaces} (2nd ed),
-  Wiley-Interscience.
+  Table 7.6 of Myers, RH, Montgomery, DC, and Anderson-Cook, CM (2009), 
+\emph{Response Surface Methodology} (3rd ed.), Wiley.
+
 }
 \keyword{datasets}

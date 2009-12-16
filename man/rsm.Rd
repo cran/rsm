@@ -3,6 +3,8 @@
 \alias{summary.rsm}
 \alias{print.summary.rsm}
 \alias{loftest}
+\alias{codings.rsm}
+\alias{canonical}
 \title{Response-surface regression}
 \description{
   Fit a linear model with a response-surface component,
@@ -13,6 +15,8 @@ rsm (..., data)
 \method{summary}{rsm} (object, ...)
 \method{print}{summary.rsm}(x, ...)
 loftest (object)
+canonical (object)
+\method{codings}{rsm}(object)
 }
 \arguments{
   \item{\dots}{In \code{rsm}, arguments that are passed to \code{\link{lm}}.
@@ -60,6 +64,11 @@ loftest (object)
   
   \code{loftest} returns an \code{\link{anova}} object that tests the fitted model against a model 
   that interpolates the means of the response-surface-variable combinations.
+  
+  \code{canonical} returns the \code{canonical} element from \code{summary.rsm}.
+  
+  \code{codings.rsm} returns a \code{list} of coding formulas if the model was fitted to 
+  \code{\link{coded.data}}, or \code{NULL} otherwise.
 }
 \references{
 Lenth RV (2009). ``Response-Surface Methods in R, Using rsm'', 
@@ -67,10 +76,6 @@ Lenth RV (2009). ``Response-Surface Methods in R, Using rsm'',
   \url{http://www.jstatsoft.org/v32/i07/.}
 }
 \author{Russell V. Lenth}
-%%%\note{ ~~further notes~~ 
-%%%
-%%% ~Make other sections like Warning with \section{Warning }{....} ~
-%%%}
 \seealso{\code{\link{FO}}, \code{\link{SO}},
   \code{\link{lm}}, \code{\link[=lm-class]{summary}}, \code{\link{coded.data}}}
 \examples{

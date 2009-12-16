@@ -117,7 +117,7 @@ rsm = function (..., data) {
     else {
         if (!missing(data)) 
             if (inherits(data, "coded.data")) 
-                LM$coding = attr(data, "coding")
+                LM$coding = attr(data, "codings")
         class(LM) = c("rsm", "lm")
     }
     LM
@@ -184,7 +184,6 @@ print.summary.rsm = function(x,...) {
   }
   cat("\n")
 }
-
 
 # Steepest ascent (and ridge analysis)
 steepest = function (object, dist=seq(0,5,by=.5), descent=FALSE) {
@@ -280,3 +279,17 @@ canonical.path = function(object,
   ans = cbind(data.frame(dist = dist), path, yhat = round(yhat, 3))
   ans
 }
+
+
+# Primitive accessor methods for 'rsm' objects
+
+canonical = function(object) {
+    if (!inherits(object, "rsm")) stop ("Not an 'rsm' object")
+    summary(object)$canonical
+}
+
+# Unfortunately, it turns out that rsm's 'codings' member is named "coding".
+# Too late now, as people may have old rsm objects laying around.
+codings.rsm = function(object)
+    object$coding
+

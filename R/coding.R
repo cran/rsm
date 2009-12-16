@@ -122,3 +122,12 @@ val2code = function(X, codings) {
   Z
 }
 
+# Primitive accessor methods
+codings = function(object)
+    UseMethod("codings")
+
+codings.coded.data = function(object)
+    attr(object, "codings")
+
+
+  

@@ -1,6 +1,11 @@
 \documentclass[article,nojss]{jss}
 \usepackage{amsmath}
 
+%%%% FIX THESE WHEN YOU REVISE! %%%%%%%%%%%%%%%%
+\def\VERSION{1.30}
+\def\DATE{16 December 2009}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \def\rsm{\pkg{rsm}}
 \def\R{\proglang{R}}
 \def\Sect#1{Section~\ref{#1}}
@@ -20,11 +25,12 @@
 \author{Russell V.~Lenth\\The University of Iowa}
 \Plainauthor{Russell V. Lenth}
 
-\title{Response-Surface Methods in \proglang{R}, Using \pkg{rsm}}
+\title{Response-Surface Methods in \proglang{R}, Using \pkg{rsm}\\
+\normalsize Updated to version \VERSION, \DATE}
 \Plaintitle{Response-Surface Methods in R, Using rsm}
 
 \Abstract{
-  This introduction to the \proglang{R} package \pkg{rsm} is a (slightly)
+  This introduction to the \proglang{R} package \pkg{rsm} is a
   modified version of \cite{Lenth:2009}, published in the
   \emph{Journal of Statistical Software}. The package \rsm{}  
   was designed to
@@ -61,7 +67,7 @@ Different levels or values of the operating conditions comprise the factors in e
 Given that, it may seem like response-surface analysis is simply a regression problem.  However, there are several intricacies in this analysis and in how it is commonly used that are enough different from routine regression problems that some special help is warranted.  These intricacies include the common use (and importance) of coded predictor variables; the assessment of the fit; the different follow-up analyses that are used depending on what type of model is fitted, as well as the outcome of the analysis; and the importance of visualizing the response surface.  Response-surface methods also involve some unique experimental-design issues, due to the emphasis on iterative experimentation and the need for relatively sparse designs that can be built-up piece-by-piece according to the evolving needs of the experimenter.
 
 The \rsm{} package for \R{} \citep{R} provides several functions to facilitate classical response-surface methods, as
-described in texts such as \cite{Box87}, \citet[Chapters~1--5]{Khu96}, \citet[Chapter~9]{Wu00}, \cite{Mye02},
+described in texts such as \cite{Box87}, \citet[Chapters~1--5]{Khu96}, \citet[Chapter~9]{Wu00}, \cite{Mye09},
 \citet[Chapters~11--12]{Box05}, and \citet[Chapter~10]{Ryan07}.  In its current form, \rsm{} covers only the
 most standard first-and second order designs and methods for one response variable; but it covers those
 reasonably well, and it could be expanded in the future.  Multiple-response optimization is not covered
@@ -84,34 +90,34 @@ An important aspect of response-surface analysis is using an appropriate coding 
 
 Accordingly, the \rsm{} package provides for a "coded.data" class of objects, an extension of "data.frame".  The functions "coded.data", "as.coded.data", "decode.data", "code2val", and "val2code" create or decode such objects.  If a "coded.data" object is used in place of an ordinary "data.frame" in the call to other \rsm{} functions such as "rsm" (\Sect{fitting}) or "steepest" (\Sect{steepest}), then appropriate additional output is provided that translates the results to the original units.  The print method for a "coded.data" object displays the coding formulas.
 
-As an example, consider the provided dataset "ChemReact", which comes from Table~7.7 of \cite{Mye02}.
-<<>>=
+As an example, consider the provided dataset "ChemReact", which comes from Table~7.6 of \cite{Mye09}.
+\begin{Scode}
 library("rsm")
 ChemReact
-@
+\end{Scode}
 In this experiment, the data in block "B1" were collected first and analyzed, after which block "B2" was added and a new analysis was done.  
 Note that block "B1" uses factor settings of $\text{Time}=85\pm5$ and $\text{Temp}=175\pm5$, with three center points.  Thus, the coded variables are $x_1 = (\text{Time}-85)/5$ and $x_1 = (\text{Temp}-175)/5$.  To create a coded dataset with the appropriate codings, provide this information via formulas:
-<<>>=
+\begin{Scode}
 CR <- coded.data(ChemReact, x1 ~ (Time - 85)/5, x2 ~ (Temp - 175)/5)
 CR[1:7,]
-@
+\end{Scode}
 Any way of writing a linear transformation is acceptable; for example, we could have written "x1 ~ 0.2 * Time - 17".
 Observe that "coded.data" actually transforms the predictor values and replaces those variables with their coded versions.  To create a "coded.data" object from data that are already coded, use "as.coded.data".
 
 The function "decode.data" decodes a "coded.data" object.  We may also easily encode or decode matrices or data frames of arbitrary values; for example,
-<<>>=
+\begin{Scode}
 code2val(data.frame(x1 = c(0.25, 0.5), x2 = c(-1.5, -0.5)),
   attr(CR, "codings"))
-@
+\end{Scode}
 
 
 \section{Generating a design}\label{designs}
 The functions "ccd" and "bbd" are available to generate standard response-surface designs.  For example, here
 we generate a 3-factor Box-Behnken design \cite[]{Box60} with two center points:
-<<>>=
+\begin{Scode}
 bbd(3, n0 = 2, coding =
   list(x1 ~ (Force - 20)/3, x2 ~ (Rate - 50)/10, x3 ~ Polish - 4))
-@
+\end{Scode}
 By default, the variable names are "x1", "x2", \ldots and the experiment is randomized.  If there are $4$ or $5$ factors, the design is blocked by default (this is not possible for other numbers of factors), and the blocks are randomized separately.
 
 
@@ -170,31 +176,31 @@ The function "ccd.pick" is designed to help identify good CCDs.  It simply creat
 For example, suppose that we want to experiment with $k=5$ factors, and we are willing to consider CCDs with $\mathtt{blks.c}=1$, $2$, or $4$ cube blocks of sizes $\mathtt{n.c}=8$ or $16$ each.  
 With this many factors, the number of different star points ($2k=10$) is relatively small compared with the size of some cube blocks ($16$), so it seems reasonable to consider either one or two replications ($\mathtt{wbr.s}\in\{1,2\}$) of each point within each star block.  
 Finally, suppose that we want the total size of the experiment to be no more than $N=65$ runs (see "restrict" in the call below).  Here are the ten best choices based on these criteria:
-<<>>=
+\begin{Scode}
 ccd.pick(5, n.c = c(8, 16), blks.c = c(1, 2, 4),
   wbr.s = 1:2, restrict = "N<=65")
-@
+\end{Scode}
 The first design listed is also the smallest; it consists of one cube block of $16$ runs, plus $6$ center points; and one star block with the points replicated once and one center point; thus, the total number of runs is $N=(16+6)+(10+1) = 33$.
 If we choose $\alpha=2$, this design is both orthogonal and rotatable as seen by noting that "alpha.rot" and "alpha.orth" are both equal to $2$.  The $16$ design points in the cube block may be generated by a $2^{5-1}$ fractional factorial design.
 
 While this is a small design, we have only one center point in the star block, not providing a way to test lack of fit in the star portion.  The second and third designs remedy this slightly, but all these designs are fairly lopsided in that the cube block is much larger than the star block.  The next few designs require considerably more runs.  Design number~4 is nicely balanced in that it consists of three blocks of $21$ runs each, and it is both rotatable and orthogonal.  However, we still have no lack-of-fit test in the star blocks.  Designs 5 and~6 differ only in whether they use two $2^{5-1}$ cubes or four $2^{5-2}$ cubes, but they provide several center points for a lack-of-fit test.  If we position the axis points at $\alpha=2.38$, the design is almost orthogonal and almost rotatable.  The remaining designs also come close to meeting both criteria, but are also somewhat smaller, so that Designs 9 and~10 are essentially down-sized versions of Designs 5 and~6.
 
-The choice of which design is best depends on the tradeoff between economy and ability to assess the fitted surface.  Design~1 is the only one of these that is included in Table~7.6 of \cite{Mye02}.  It is good to be able to look at a broader range of choices.
+The choice of which design is best depends on the tradeoff between economy and ability to assess the fitted surface.  Design~1 is the only one of these that is included in Table~7.6 of \cite{Mye09}.  It is good to be able to look at a broader range of choices.
 
 Once we decide the design, the "ccd" function is used to generate it. We first illustrate the generation of Design~1 above.  This design requires a $2^{5-1}$ fraction for the cube block.  Typically, this is done by confounding the five-way interaction with the mean; or equivalently, create a four-factor design, and generate the levels of the fifth as the four-way interaction of the others.  That is the approach implemented by "ccd".
 Suppose that we denote the design factors by $A,B,C,D,E$; let's opt to use $E=-ABCD$ as the generator.  The following call generates the design (results not shown):
-<<>>=
+\begin{Scode}
 des1 <- ccd (y1 + y2 ~ A + B + C + D,
   generators = E ~ - A * B * C * D, n0 = c(6, 1))
-@
+\end{Scode}
 The value of $\alpha$ was not specified, and by default it uses the $\alpha$ for orthogonality.  The first argument could have been just "4", but then the generator would have had to have been given in terms of the default variable names "x1", "x2", \ldots.  The optional left-hand side in the formula creates place-holders for response variable(s), to be filled-in with data later.  As in "bbd", we could have added coding formulas to create a "coded.data" object. 
 
 Next, we illustrate the generation of Design~10.
 This design has four $2^{5-2}$ cube blocks with $2$ center points each, and one unreplicated star block with $4$ center points.  The non-center points in the cube blocks comprise $4\times8=32$ runs, so we most likely want to create them by dividing the full $2^5$ factorial into four fractional blocks.  We can for example opt to generate the blocks via the factors $b_1=ABC$ and $b_2=CDE$, so that the blocks are determined by the four combinations of $b_1$ and $b_2$.  Then the block effects will be confounded with the effects $ABC$, $CDE$, and also the $b_1b_2$ interaction $ABC^2DE=ABDE$.  It  is important in response-surface work to avoid confounding second-order interactions, and this scheme is thus acceptable.  Unlike Design~1, this design includes all $2^5$ factor combinations, so we do not use the "generators" argument; instead, we use "blocks" to do the fractionation:
-<<>>=
+\begin{Scode}
 des10 <- ccd( ~ A + B + C + D + E,
   blocks = Blk ~ c(A * B * C, C * D * E), n0 = c(2, 4))
-@
+\end{Scode}
 Each block is randomized separately, but the order of the blocks is not randomized---we may not want to run them in sequence.  
 With this design, just one of the cube blocks is sufficient to estimate a first-order response surface.  What
 is less obvious, but true, is that we can run any two of the cube blocks plus the axis block and obtain
@@ -212,34 +218,34 @@ There are several other types of designs that are useful for response surfaces, 
 A response surface is fitted using the "rsm" function.  This is an extension of "lm", and works almost exactly like it; however, the model formula for "rsm" must make use of the special functions "FO", "TWI", "PQ", or "SO" (for ``first-order,'', ``two-way interaction,'' ``pure quadratic,'' and ``second-order,'' respectively), because the presence of these specifies the response-surface portion of the model.  Other terms that don't involve these functions may be included in the model; often, these terms would include blocking factors and other categorical predictors.
 
 To illustrate this, let us revisit the "ChemReact" data (and its coded version "CR"), introduced in \Sect{coding}.  We have one response variable, "Yield", and two coded predictors "x1" and "x2" as well as a blocking factor "Block".  Supposing that the experiment was done in two stages, we first act as though the data in the second block have not yet been collected; and fit a first-order response-surface model to the data in the first block:
-<<>>=
+\begin{Scode}
 CR.rsm1 <- rsm(Yield ~ FO(x1, x2), data = CR, subset = (Block == "B1"))
 summary(CR.rsm1)
-@
+\end{Scode}
 What we see in the summary is the usual summary for a "lm" object (with a subtle difference), followed by some additional information particular to response surfaces.  The subtle difference is that the labeling of the regression coefficients is simplified (we don't see ``"FO"'' in there).  The analysis-of-variance table shown includes a breakdown of lack of fit and pure error, and we are also given information about the direction of steepest ascent.  Since the dataset is a "coded.data" object, the steepest-ascent information is also presented in original units.  (While "rsm" does not require a "coded.data" dataset, the use of one is highly recommended.)
 
 In this particular example, the steepest-ascent information is of little use, because there is significant
 lack of fit for this model ($p \approx 0.01$).  It suggests that we should try a higher-order model.  For example, we could add two-way interactions:
-<<results=hide>>=
+\begin{Scode}{results=hide}
 CR.rsm1.5 <- update(CR.rsm1, . ~ . + TWI(x1, x2))
 summary(CR.rsm1.5)
-@
+\end{Scode}
 The results are not shown, but one finds there is still a small $p$~value for lack-of-fit.  
 
 To go further, we need more data.  Thus, let us now presume that the data in the second block have been collected, so that there is data from a full central-composite design.  We are now in the position of fitting a full second-order model.  This can be done by adding "PQ(x1, x2)" to the above model with interaction, but the easier way is to use "SO", which is shorthand for a model with "FO", "TWI", and "PQ" terms.  Also, we now need to account for the block effect since the data are collected in separate experiments:
-<<>>=
+\begin{Scode}
 CR.rsm2 <- rsm(Yield ~ Block + SO(x1, x2), data = CR)
 summary(CR.rsm2)
-@
+\end{Scode}
 The lack of fit is now non-significant ($p \approx 0.69$).   The summary for a second-order model provides
 results of a canonical analysis of the surface rather than for steepest ascent.  The analysis indicates that
 the stationary point of the fitted surface is at $(0.37, 0.33)$ in coded units---well within the experimental region; and that both eigenvalues are negative, indicating that the stationary point is a maximum.  This is the kind of situation we dream for in response-surface experimentation---clear evidence of a nearby set of optimal conditions.  We should probably collect some confirmatory data near this estimated optimum at $\text{Time}\approx87$, $\text{Temp}\approx 177$, to make sure.
 
 Another example that comes out a different way is a paper-helicopter experiment \cite[Table 12.5]{Box05}.  This is another central-composite experiment, in four variables and two blocks.  The data are provided in the \rsm{} dataset "heli"; these data are already coded.  The original variables are wing area "A", wing shape "R", body width "W", and body length "L".  The goal is to make a paper helicopter that flies for as long as possible.  Each observation in the dataset represents the results of ten replicated flights at each experimental condition.  Here we study the average flight time, variable name "ave", using a second-order surface.
-<<>>=
+\begin{Scode}
 heli.rsm <- rsm(ave ~ block + SO(x1, x2, x3, x4), data = heli)
 summary(heli.rsm)
-@
+\end{Scode}
 From the analysis of variance, it is clear that the second-order ("TWI" and "PQ") terms contribute significantly to the model, so the canonical analysis is relevant.  Again, the stationary point is fairly near the experimental region, but the eigenvalues are of mixed sign, indicating that it is a saddle point (neither a maximum nor a minimum).  We will do further analysis of these results in subsequent sections.
 
 
@@ -250,13 +256,14 @@ From the analysis of variance, it is clear that the second-order ("TWI" and "PQ"
 \caption{\label{heliplots} Fitted response-surface contour plots near the stationary point for the helicopter experiment.}
 \end{figure}
 
-While the canonical analysis gives us a handle on the behavior of a second-order response surface, an effective graph is a lot easier to present and explain.  To that end, "rsm" includes a function for making contour plots of a fitted response surface.  This function is not restricted to "rsm" results, however; it can be used for plotting any regression surface produced by "lm".  We provide the "lm" or "rsm" object, a formula for which predictors to use, and various optional parameters.  Consider the paper-helicopter example in the preceding section; there are four response-surface predictors, making six pairs of predictors.  If we want to visualize the behavior of the fitted surface around the stationary point, we can provide that location as the "at" argument:
-<<fig6, fig=TRUE, include=FALSE, height=6, width=8>>=
+While the canonical analysis gives us a handle on the behavior of a second-order response surface, an effective graph is a lot easier to present and explain.  To that end, "rsm" includes a function for making contour plots of a fitted response surface.  This function is not restricted to "rsm" results, however; it can be used for plotting any regression surface produced by "lm".  For more detailed information, see the associated vignette \href{rsm-plots.pdf}{``Surface Plots in the \rsm{} Package.''}
+We provide the "lm" or "rsm" object, a formula for which predictors to use, and various optional parameters.  Consider the paper-helicopter example in the preceding section; there are four response-surface predictors, making six pairs of predictors.  If we want to visualize the behavior of the fitted surface around the stationary point, we can provide that location as the "at" argument:
+\begin{Scode}{fig6, fig=TRUE, include=FALSE, height=6, width=8}
 par(mfrow = c(2, 3))
-contour(heli.rsm, ~ x1 + x2 + x3 + x4,
+contour(heli.rsm, ~ x1 + x2 + x3 + x4, image = TRUE,
   at = summary(heli.rsm)$canonical$xs)
-@
-The plots are shown in Figure~\ref{heliplots}.  By default, each plot displays a color image overlaid by the
+\end{Scode}
+The plots are shown in Figure~\ref{heliplots}.  The "image" argument causes each plot to display a color image overlaid by the
 contour lines.  When multiple plots like this are produced, the color levels are held consistent across all
 plots.  Note that the "at" condition does not set the center of the coordinate systems (the default variable
 ranges are derived from the data); it sets the values at which to hold variables other than those on one of
@@ -267,9 +274,9 @@ where $x_3 = -0.839$ and $x_4 = -0.116$, the stationary values.  The maximum for
 
 \section{Direction for further experimentation}\label{steepest}
 In many first-order cases, as well as second-order cases where we find a saddle point or the stationary point is distant, the most useful further action is to decide in which direction to explore further.  In the case of first-order models, one can follow the direction of steepest ascent.  As already seen in \Sect{fitting}, the "summary" method for "rsm" objects provides some information about this path.  More detailed information is available via the "steepest" function; for example,
-<<>>=
+\begin{Scode}
 steepest(CR.rsm1, dist = c(0, 0.5, 1))
-@
+\end{Scode}
 In general, we can specify any set of distances along the path.  The  decoded coordinate values are displayed if the model was fitted to a "coded.data" dataset.  
 
 At this point it is worth emphasizing that, although the fitted values are also displayed, one must be careful to understand that these are only predictions and that, as the distance increases, they are very poor predictions and should be taken with a grain of salt.  What one should do is to conduct actual experimental runs at points along this path, and use the observed response values, not these predictions, for guidance on where to locate the next factorial experiment.
@@ -277,9 +284,9 @@ At this point it is worth emphasizing that, although the fitted values are also 
 In the second-order case, the "steepest" function still works, but it uses the ridge analysis method \cite[]{Hoe59,Dra63}, which is the analog of steepest ascent in the sense that for a specified distance $d$, it finds the point at which the predicted response is a maximum among all predictor combinations at radius $d$.  This method makes sense when the stationary point is some distance away; but when this point is nearby, it makes more sense to start at the saddle point (rather than the origin) and follow the most steeply rising ridge in \emph{both} directions.  This path is obtained using the "canonical.path" function.  In this function, distance is a signed quantity, according to the direction along the ridge.
 
 In the "heli" example, we do have a nearby stationary point.  Here are some points within a radius of $5$ along the canonical path:
-<<>>=
+\begin{Scode}
 canonical.path(heli.rsm, dist = seq(-5, 5, by = 0.5))
-@
+\end{Scode}
 \citet[Table~12.7 and~Figure~12.6]{Box05} reports some results of experimentation along this path.  They found the most promising location for the next experiment was at a distance of about $3.5$ ($-3.5$ on their scale as their signs are reversed from ours).
 
 \section{Discussion}
