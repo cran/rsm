@@ -56,6 +56,7 @@ contour.lm = function(x, form, at, bounds, zlim,
     forms = codings(lmobj)
     if (!is.null(forms))
       xlabs = sapply(vars, function(v) paste(as.character(forms[[v]][2:3]), collapse=" = "))
+    else xlabs = vars
   }   
   else if (missing(xlabs)) xlabs = vars
 

@@ -1,5 +1,10 @@
 NEWS for rsm package
 
+Changes in version 1.31 (December 19, 2009)
+
+  * Fixed logic bug in contour.lm - didn't handle xlabs correctly
+
+
 Changes in version 1.30 (December 16, 2009)
 
   * Enhanced contour.lm with hooks and improved axis labeling
