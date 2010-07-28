@@ -2,8 +2,8 @@
 \usepackage{amsmath}
 
 %%%% FIX THESE WHEN YOU REVISE! %%%%%%%%%%%%%%%%
-\def\VERSION{1.30}
-\def\DATE{16 December 2009}
+\def\VERSION{1.40}
+\def\DATE{28 July 2010}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \def\rsm{\pkg{rsm}}
@@ -209,6 +209,12 @@ of collecting data), create a fake vector of response values, and use the "rsm" 
 fit a second-order surface to the subset "(Blk == 1 | Blk == 2 | Blk == 5)".  It would produce an error message if the design were inadequate; but it doesn't.  In summary, this design provides for a lot of flexibility in how to proceed.
 
 It is possible to imagine a CCD that consists of a fractional factorial divided into blocks.  For such a design, both "generators" and "blocks" would be needed.  For smaller numbers of factors, most CCDs require no fractionation of either type, and obviously these are simple to generate.
+
+Starting in version~1.40 of \rsm{}, a new "inscribed" argument is available in "ccd".  This scales the entire design so that it fits within a unit cube---useful for situations when there are constraints on the region of operability.
+\begin{Scode}
+ccd(2, n0 = c(1,1), inscribed=TRUE, randomize=FALSE)
+\end{Scode}
+Note in this example that it is now the axis points that are at $\pm1$, while the cube points are at $\pm\sqrt{1/2}$.
 
 There are several other types of designs that are useful for response surfaces, as mentioned in several of the books referenced in this article.  Provisions for generating those designs are an area of future development in the \rsm{} package.
 

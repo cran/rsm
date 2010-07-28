@@ -9,20 +9,22 @@
 }
 \usage{
 \method{contour}{lm}(x, form, at, bounds, zlim, xlabs, hook, 
-  plot.it=TRUE, image=FALSE, img.col=terrain.colors(50), ...)
+  plot.it=TRUE, atpos = 1, image=FALSE, img.col=terrain.colors(50), ...)
 
-\method{image}{lm}(x, form, at, bounds, zlim, xlabs, hook,  ...)
+\method{image}{lm}(x, form, at, bounds, zlim, xlabs, hook, atpos = 1, ...)
 
 \method{persp}{lm}(x, form, at, bounds, zlim, zlab, xlabs, col = "white", 
-  contours = NULL, hook, theta = -25, phi = 20, r = 4, 
+  contours = NULL, hook, atpos = 3, theta = -25, phi = 20, r = 4, 
   border = NULL, box = TRUE, ticktype = "detailed", ...) 
 }
 \arguments{
   \item{x}{A \code{lm} object.}
   \item{form}{A formula, or a list of formulas.}
-  \item{at}{Optional named list of fixed values to use for variables other
-    than the axis variables.  If not provided, the mean is used for numeric variables,
-    or the first level if it is a factor.}
+  \item{at}{Optional \emph{named} list of fixed values to use for surface slices.
+    For example, if the predictor variables are \code{x1}, \code{x2}, and \code{x3}, the contour plot of \code{x2} versus \code{x1} would be
+    based on the fitted surface sliced at the \code{x3} value specified in \code{at}; the contour plot of \code{x3} versus \code{x1} would be sliced at the \code{at} value for \code{x2}; etc.
+    If not provided, \code{at} defaults to the mean value of each numeric variable,
+    and the first level of each factor.}
   \item{bounds}{Optional \emph{named} list of bounds or grid values to use for
     the variables having the same names.  See details.}
   \item{zlim}{Optional \code{zlim} setting passed to \code{\link{image}}.
@@ -31,6 +33,9 @@
   \item{xlabs}{Alternate labels for predictor axes (see Details).}
   \item{hook}{Optional list that can contain functions \code{pre.plot} and \code{post.plot}.  
     May be used to add annotations or to re-route the graphs to separate files (see Details).}
+  \item{atpos}{Determines where \code{at} values are displayed.  A value of 1 (or 2) displays it as part of the \emph{x} (or \emph{y}) axis label.
+    A value of 3 displays it as a subtitle below the plot.  A value of 0 suppresses it.
+    Any other nonzero value will cause the label to be generated but not displayed; it can be accessed via a \code{hook} function.}
   \item{image}{Set to \code{TRUE} if you want an image plot overlaid by contours.}
   \item{img.col}{Color map to use when \code{image=TRUE}.}
   \item{plot.it}{If \code{TRUE}, no plot is produced, just the return value.}
@@ -95,7 +100,9 @@
   Each list item is itself a \code{list} with the following components:
   \item{x, y}{The values used for the x and y axes}
   \item{z}{The matrix of fitted response values}
-  \item{labs}{Character vector of length 4: Elements 1 and 2 are the x and y axis labels, and elements 3 and 4 are their original variable names}
+  \item{labs}{Character vector of length 5: Elements 1 and 2 are the x and y axis labels, 
+    elements 3 and 4 are their original variable names,
+    and element 5 is the slice label (empty if \code{atpos} is 0)}
   \item{zlim}{The computed or provided \code{zlim} values}
   \item{transf}{(\code{persp} only) The 3D transformation for \code{\link{trans3d}}}
 }
@@ -114,20 +121,9 @@ heli.rsm = rsm (ave ~ block + SO(x1, x2, x3, x4), data = heli)
 par (mfrow = c (2,3))
 contour (heli.rsm, ~x1+x2+x3+x4, at=canonical(heli.rsm)$xs)
 
-# Same with image overlay and extra annotations showing 
-# stationary point and "at" values
-# Demonstrates use of 'hook' argument
-xs = canonical(heli.rsm)$xs
-myhook = list()
-myhook$post.plot = function(lab) {
-  idx = sapply(lab[3:4], grep, names(xs))
-  points (xs[idx[1]], xs[idx[2]], pch=2, col="red")
-  main = paste("Predicted response versus", lab[3], "and", lab[4])  
-  atlabs = paste(names(xs[-idx]), round(xs[-idx], 3), sep = " = ")
-  atlabs = paste(atlabs, collapse = ", ")
-  title(c(main, paste("at", atlabs)))
-}
-contour (heli.rsm, ~x1+x2+x3+x4, at=xs, hook=myhook, image=TRUE)
+# Same but with image overlay, slices at origin and block 2,
+# and no slice labeling
+contour (heli.rsm, ~x1+x2+x3+x4, at=list(block="2"), atpos=0, image=TRUE)
 
 # Default perspective views
 persp (heli.rsm, ~x1+x2+x3+x4, at=canonical(heli.rsm)$xs)

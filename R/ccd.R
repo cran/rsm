@@ -3,7 +3,7 @@
 # 
 
 ccd = function(basis, generators, blocks="Block", n0=4, alpha="orthogonal", 
-               wbreps=1, bbreps=1, randomize=TRUE, coding)
+               wbreps=1, bbreps=1, randomize=TRUE, inscribed=FALSE, coding)
 {
     if (inherits(basis, "formula"))
         xvars = all.vars(basis[[length(basis)]])
@@ -103,7 +103,10 @@ ccd = function(basis, generators, blocks="Block", n0=4, alpha="orthogonal",
         else
             alpha = sqrt(nrow(star) / s.ii  * c.ii / nrow(cube))
     }
-    star = star * alpha
+    if (inscribed)
+        cube = cube / alpha
+    else
+        star = star * alpha
     
     # append blocking variable
     cube = cbind(blk, cube)

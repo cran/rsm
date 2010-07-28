@@ -1,26 +1,40 @@
 ### Reconstructs the data set used in a linear model, and
 ### returns it as a data.frame
 
-model.data = function (lmobj, lhs=FALSE) {
+model.data = function (lmobj, lhs = FALSE) {
     form = lmobj$call$formula
     if (is.name(form)) {
         lmobj$call$data = form
         form = formula(lmobj)
     }
-    if (lhs)
+    if (lhs) 
         nm = all.vars(form)
-    else
-        nm = all.vars(form[[3]])
-    form = as.formula(paste("~", paste(nm, collapse = "+")))
-    model.frame(form, eval(lmobj$call$data), subset = eval(lmobj$call$subset))
+    else nm = all.vars(form[[3]])
+    if (inherits(lmobj, "rsm") && !is.null(lmobj$data))
+        lmobj$data[ ,nm]
+    else {
+        form = as.formula(paste("~", paste(nm, collapse = "+")))
+        envir = attr(lmobj$terms, ".Environment")
+        model.frame(form, eval(lmobj$call$data, envir=envir), 
+            subset = eval(lmobj$call$subset, envir=envir))
+    }
 }
 
 
 ### contour plot(s) for a lm
 contour.lm = function(x, form, at, bounds, zlim, 
-    xlabs, hook, plot.it=TRUE, # args added Dec 09
+    xlabs, hook, plot.it=TRUE, atpos = 1,
     image=FALSE, img.col=terrain.colors(50), ...) 
 {
+  if (!missing(at)) {
+    if (is.null(names(at)))
+      stop("'at' must be a NAMED list of values used for surface slices")
+  }
+  if (!missing(bounds)) {
+    if (is.null(names(bounds)))
+      stop("'bounds' must be a NAMED list of bounds for each variable")
+  }
+
   lmobj = x   # generic wants it named 'x', I don't!
   
   data = model.data(lmobj)
@@ -59,7 +73,8 @@ contour.lm = function(x, form, at, bounds, zlim,
     else xlabs = vars
   }   
   else if (missing(xlabs)) xlabs = vars
-
+  
+  
   # gather 'at' info
   tmp = lapply(data, function(var) {
     if (is.factor(var)) factor(levels(var)[1], levels=levels(var))
@@ -82,6 +97,10 @@ contour.lm = function(x, form, at, bounds, zlim,
     else x
   })
   
+  # get names to use in slice labels
+  isnum = sapply(at, is.numeric)
+  allnum = names(at)[isnum]
+  allfac = names(at)[!isnum]
   
   ### Accumulate the z values
   plot.data = list()
@@ -103,10 +122,29 @@ contour.lm = function(x, form, at, bounds, zlim,
       z[z < zlim[1]] = NA
     }
     vnames = c(x=v[2], y=v[1])
-    labs = c(xlabs[sapply(vnames, charmatch, vars)], vnames)
+    labs = c(xlabs[sapply(vnames, charmatch, vars)], vnames, "")
+    lbls[i] = paste(labs[3], labs[4], sep=" ~ ")
+    
+    # figure out slice labels
+    if (atpos != 0) {
+      atidx = - sapply(vnames, grep, allnum)
+      atidx = allnum[atidx] 
+      if (length(atidx) > 0 || length(allfac) > 0) {
+      atlabs = NULL
+        if (length(atidx) > 0) {
+          atvals = round(sapply(atidx, function(v) at[[v]]), 2)
+          atlabs = paste(atidx, atvals, sep = " = ")
+        }
+        faclabs = paste(allfac, sapply(allfac, function(v) at[[v]]), sep=" = ")
+        atlabs = paste(c(atlabs, faclabs), collapse = ", ")
+        labs[5] = paste("Slice at", atlabs)
+        if (atpos < 3)
+          labs[atpos] = paste(labs[atpos], "\n", labs[5], sep = "")
+      }
+    }
+
     plot.data[[i]] = list(x=x, y=y, 
       z=matrix(z, nrow=length(x)), labs=labs)
-    lbls[i] = paste(labs[3], labs[4], sep=" ~ ")
   }
   names(plot.data) = lbls
   
@@ -127,6 +165,8 @@ contour.lm = function(x, form, at, bounds, zlim,
     else {
       contour(dat$x, dat$y, dat$z, 
         xlab = dat$labs[1], ylab = dat$labs[2], ...)
+      if (atpos == 3)
+        title(sub = labs[5])
     }
     if (!missing(hook))
       if (!is.null(hook$post.plot)) hook$post.plot(dat$labs)
@@ -137,15 +177,17 @@ contour.lm = function(x, form, at, bounds, zlim,
 
 
 # Image plot for a lm
-image.lm = function(x, form, at, bounds, zlim, xlabs, hook,  ...)  {
-  plot.data = contour.lm(x, form, at, bounds, zlim, xlabs, plot.it=FALSE)
+image.lm = function(x, form, at, bounds, zlim, xlabs, hook, atpos=1, ...)  {
+  plot.data = contour.lm(x, form, at, bounds, zlim, xlabs, atpos=atpos, plot.it=FALSE)
   for (i in 1:length(plot.data)) {
     dat = plot.data[[i]]
     if (!missing(hook))
       if (!is.null(hook$pre.plot)) hook$pre.plot(dat$labs)
     
     image(dat$x, dat$y, dat$z, 
-        xlab = dat$labs[1], ylab = dat$labs[2], zlim = dat$zlim, ...)
+      xlab = dat$labs[1], ylab = dat$labs[2], zlim = dat$zlim, ...)
+    if (atpos == 3)
+      title(sub = dat$labs[5])
     
     if (!missing(hook))
       if (!is.null(hook$post.plot)) hook$post.plot(dat$labs)
@@ -161,8 +203,9 @@ image.lm = function(x, form, at, bounds, zlim, xlabs, hook,  ...)  {
 # contours: if TRUE, black contours.  Can also be a list with elements
 #   z="bottom" (or "top" or value), col="black", lwd=1
 persp.lm = function(x, form, at, bounds, zlim, zlab, 
-    xlabs, col = "white", contours=NULL, hook,
-    theta = -25, phi = 20, r = 4, border=NULL, box=TRUE, ticktype = "detailed", 
+    xlabs, col = "white", contours=NULL, hook, atpos=3, 
+    theta = -25, phi = 20, r = 4, border = NULL, box = TRUE,
+    ticktype = "detailed", 
     ...) 
 {
   draw.cont.line = function(line) {
@@ -173,7 +216,7 @@ persp.lm = function(x, form, at, bounds, zlim, zlab,
     lines(trans3d(line$x, line$y, cont.z, transf),
       col=cont.col, lwd=cont.lwd)
   }
-  plot.data = contour.lm(x, form, at, bounds, zlim, xlabs, plot.it=FALSE)
+  plot.data = contour.lm(x, form, at, bounds, zlim, xlabs, atpos=atpos, plot.it=FALSE)
   transf = list()
   if (missing(zlab)) zlab = ""
   
@@ -238,6 +281,9 @@ persp.lm = function(x, form, at, bounds, zlim, zlab,
     transf = persp(dat$x, dat$y, dat$z,
       xlab=dat$labs[1], ylab=dat$labs[2], zlab=zlab,
       zlim=dat$zlim, col=facet.col, border=border, box=box, theta=theta, phi=phi, r=r, ticktype=ticktype, ...)
+    if (atpos == 3)
+      title(sub = dat$labs[5])
+
     if (cont && !cont.first)
       lapply(cont.lines, draw.cont.line)
     if (!missing(hook))

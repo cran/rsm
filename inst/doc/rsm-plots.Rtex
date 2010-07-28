@@ -2,8 +2,8 @@
 \usepackage{amsmath}
 
 %%%% FIX THESE WHEN YOU REVISE! %%%%%%%%%%%%%%%%
-\def\VERSION{1.30}
-\def\DATE{16 December 2009}
+\def\VERSION{1.40}
+\def\DATE{28 July 2010}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \def\rsm{\pkg{rsm}}
@@ -116,27 +116,30 @@ To obtain contour plots with each of the 6 possible pairs of the variables $x_1$
 par(mfrow = c(2,3))
 contour (heli.rsm, ~ x1 + x2 + x3 + x4)
 \end{Scode}
-The result is shown in Figure~\ref{cont1}.  This dataset is an extension of "data.frame" that contains the coding information, and this information is retained in "heli.rsm".  When such coding is present, the coding formulas become the default axis labels, as can be seen in the figure.
+The result is shown in Figure~\ref{cont1}.  This dataset is an extension of "data.frame" that contains the coding information, and this information is retained in "heli.rsm".  When such coding is present, the coding formulas become the default axis labels, as can be seen in the figure.  
 
+Also, when variables other than those on the coordinate axes are involved, then what is displayed is a slice of the response surface, holding the other variables fixed at certain values.  By default, we use the averages of numeric predictors, and the first levels of factors.  This information is incorporated as part of the $x$-axis label in each contour plot.
 \def\xbar{\bar{x}}
-What is less obvious is that some hidden choices were made in each plot.  In the first one, for example, we have variables $x_1$ and~$x_2$ on the coordinate axes, and the routine, given no other specifications, chose the averages $\xbar_3=0$ and~ $\xbar_4=0$ for the values of the other variables (most response-surface designs are centered at zero in the coded variables).
-In this example, we are interested in the behavior of the response surface in a neighborhood of the stationary point (where the gradient is zero).  If the stationary point is saved as "xs", we simply add the argument "at = xs" in the call to "contour" to center the plots around the stationary point.  This is illustrated in the next section.
+In this example, we are probably more interested in the behavior of the response surface in a neighborhood of the stationary point (where the gradient is zero).  We show how to do this after a little bit more discussion in the next section.
+
+%%%%%If the stationary point is saved as "xs", we simply add the argument "at = xs" in the call to "contour" to center the plots around the stationary point.  This is illustrated in the next section.
 
 \section{Annotations and hooks}
-Suppose in the helicopter example, we want to add some annotations to the plots.  Since there are several plots, we don't want to do this manually.  The "contour" method for "lm" objects (as well as "image" and "persp") allow one to specify a "hook" argument to take care of things like that.  The hook should be a "list" containing function definitions for one or both of "pre.plot" and "post.plot".  Obviously, these are functions that are run just before, and just after, each plot is constructed.  Each function is passed one argument, a character vector of length $4$; elements $1$ and~2 are the labels for the horizontal and vertical axes, and elements $3$ and~$4$ are the corresponding variable names.  The following code sets up a "post.plot" hook that adds a title to each plot, as well as plotting the location of stationary point.
+Suppose in the helicopter example, we want to add some annotations to the plots.  Since there are several plots, we don't want to do this manually.  The "contour" method for "lm" objects (as well as "image" and "persp") allow one to specify a "hook" argument to take care of things like that.  The hook should be a "list" containing function definitions for one or both of "pre.plot" and "post.plot".  Obviously, these are functions that are run just before, and just after, each plot is constructed.  Each function is passed one argument, a character vector of length $4$; elements $1$ and~2 are the labels for the horizontal and vertical axes; elements $3$ and~$4$ are the corresponding variable names; and element 5 is a label describing the slice being plotted.
+
+In the following code, we set up a "post.plot" hook to plot the position of the stationary point in each graph.
 \begin{Scode}
 xs <- canonical(heli.rsm)$xs
 myhook <- list()
 myhook$post.plot <- function(lab) {
   idx <- sapply(lab[3:4], grep, names(xs))
   points (xs[idx[1]], xs[idx[2]], pch=2, col="red")
-  main <- paste("Predicted time vs.", lab[3], "and", lab[4])  
-  atlabs <- paste(names(xs[-idx]), round(xs[-idx], 3), sep = " = ")
-  atlabs <- paste(atlabs, collapse = ", ")
-  title(c(main, paste("at", atlabs)))
 }
 \end{Scode}
-The coding is a bit tedious due to the need to match elements of "xs" with the variable names.  Figure~\ref{cont2} shows the results of including this hook function and centering the plots at the stationary point.  With the default of "image=TRUE", the contours are overlaid on an image plot.  Notice that the coloring is consistent across all six plots.  Centering at the stationary point gives an entirely different view of the fitted surface than is seen in Figure~\ref{cont1}.
+The coding is a bit tedious due to the need to match elements of "xs" with the variable names.  
+To create an enhanced contour plot, use the "at" argument to specify that we want the plots sliced at the stationary point instead of the origin, the "image" argument to enhance the plots with a background color image, and use "hook" to incorporate the above hook function.  
+Figure~\ref{cont2} shows the results.
+Centering at the stationary point gives an entirely different view of the fitted surface than is seen in Figure~\ref{cont1}.
 \begin{Scode}{cont2, fig=TRUE, include=FALSE, height=6, width=8}
 par(mfrow = c(2,3))
 contour (heli.rsm, ~ x1 + x2 + x3 + x4, image = TRUE,
@@ -151,17 +154,14 @@ pdf(file = "heli-cps.pdf")
 contour (heli.rsm, ~ x1 + x2 + x3 + x4, image = TRUE, at = xs, hook = myhook)
 dev.off()
 \end{Scode}
-With this example, the resulting file will have six pages, one per graph.  If you are using \pkg{Sweave}, the device setup is already done in the background, and all you need to do is import the desired graphs.  The \LaTeX{} source file would go something like this, assuming that the source file is named "mydoc.Rnw":
+With this example, the resulting file will have six pages, one per graph.  We can then import, say, the fourth graph into a \proglang{pdflatex} source file using a command like
 \begin{verbatim}
-<<cplot1, fig=TRUE, include=FALSE>>=
-contour (heli.rsm, ~ x1 + x2 + x3 + x4, image = TRUE, at = xs, hook = myhook)
-@
-\includegraphics[width=.5\linewidth, page=4]{mydoc-cplot1.pdf}
+\includegraphics[width=.75\linewidth, page=4]{heli-cps.pdf}
 \end{verbatim}
- 
+If you are using \pkg{Sweave}, the device setup is already done in the background, and all you need to do is label the code chunk and import the desired graph(s).
 
 
-For single-page formats, use hooks to create files based on variable names.  For example,
+If instead you want to create a separate file for each graph, use hooks to create files based on variable names.  For example,
 \begin{Scode}{eval=FALSE}
 png.hook <- list()
 png.hook$pre.plot <- function(lab) 
@@ -170,7 +170,7 @@ png.hook$post.plot = function(lab)
     dev.off()
 contour (heli.rsm, ~ x1 + x2 + x3 + x4, image = TRUE, at = xs, hook = png.hook)
 \end{Scode}
-(To also include the titles and annotations, use the "post.plot" function in "myhook", but add the "dev.off()" statement to the end.)
+%%%(To also include the titles and annotations, use the "post.plot" function in "myhook", but add the "dev.off()" statement to the end.)
 
 \section{More on perspective plots}
 The "lm" method for "persp" handles its "col" argument differently than the default "persp" function.  For other than a single color, it determines surface-facet colors based on the fitted response value (like is done in "image") rather than requiring a matrix of facet colors.

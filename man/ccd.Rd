@@ -6,7 +6,7 @@ This function can generate a broad range of central-composite designs with flexi
 }
 \usage{
 ccd(basis, generators, blocks = "Block", n0 = 4, alpha = "orthogonal", 
-    wbreps = 1, bbreps = 1, randomize = TRUE, coding)
+    wbreps = 1, bbreps = 1, randomize = TRUE, inscribed = FALSE, coding)
 }
 \arguments{
   \item{basis}{A formula, or an integer giving the number of variables.  If the formula has a left-hand side, the variables named there are appended to the design and initialized to \code{NA}.}
@@ -16,10 +16,11 @@ ccd(basis, generators, blocks = "Block", n0 = 4, alpha = "orthogonal",
     If only one value, this is the number of center pouints in each block.
     If two values are given, \code{n0[1]} specifies the number of center points in 
     'cube' blocks, and \code{n0[2]} specifies the number of center points in 'star' blocks.}
-  \item{alpha}{If numeric, the position of the 'star' points.  May also be a character string; if it matches \code{"orthogonal"},the star points are positioned to block the design orthogonally; if it matches \code{"rotatable"}, the star points are chosen to make the design rotatable.  The default is to generate an orthogonally blocked design.}
+  \item{alpha}{If numeric, the position of the 'star' points.  May also be a character string; if it matches \code{"orthogonal"},the star points are positioned to block the design orthogonally; if it matches \code{"rotatable"}, the star points are chosen to make the design rotatable.  The default is to generate an orthogonally blocked design.  Note that a face-centered design is obtained by specifying \code{alpha = 1}.}
   \item{wbreps}{Number(s) of within-block replications.  If this is a vector of length 2, then separate numbers are used for the 'cube' and the 'axis' blocks respectively.}
   \item{bbreps}{Number(s) of between-block replications (i.e., number of repeats of each block).  f this is a vector of length 2, then separate numbers are used for the 'cube' and the 'axis' blocks respectively.}
-  \item{randomize}{Boolean determinig whether or not to randomize the design.  Each block is randomized separately.}
+  \item{randomize}{Boolean determining whether or not to randomize the design.  Each block is randomized separately.}
+  \item{inscribed}{Boolean value.  If \code{FALSE}, the cube points are at +/- 1 and the axis points are at least 1.  If \code{TRUE}, the entire desgn is scaled down so that the axis points are at +/- 1 and the cube points are at interior positions.}
   \item{coding}{Optional list of formulas.  If this is provided, a \code{\link{coded.data}} object is returned with the specified coding.}
 }
 \details{
@@ -29,7 +30,7 @@ The \code{basis} argument determines a basic design used to create cube blocks. 
 
 If you want the cube points divided into fractional blocks, give the formula(s) in the \code{blocks} argument.  For instance, suppose we have \code{basis = A+B+C+D+E}, \code{generators = F~-A*C*D}, and \code{blocks = Day ~ c(A*B*C, C*D*E)}.  Then the blocking variable will be named \code{"Day"}, and the basic 32-run design (half-fraction of 6 factors) will be divided into 4 blocks of 8 runs each, based on the combination of signs of \code{A*B*C} and \code{C*D*E}.  Notice that \code{Day} will be confounded with its generators, the interaction thereof, and all aliases of these: \code{Day = ABC = CDE = ABDE = -BDF = -ADCF = -BCEF = -AEF}.  To each of these blocks, we will add \code{n0} (or \code{n0[1]}) center points.
 
-A star block contains \code{n0} (or \code{n0[2]}) center points, plus points at \code{+/- alpha} on each coordinate axis.  You may specify the \code{alpha} you want, or have it chosen to achieve orthogonality of blocks (the default) or rotatability.  Conditions for these criteria to hold are described in detail in references such as Myers and Montgomery (2005).
+A star block contains \code{n0} (or \code{n0[2]}) center points, plus points at \code{+/- alpha} on each coordinate axis.  You may specify the \code{alpha} you want, or have it chosen to achieve orthogonality of blocks (the default) or rotatability.  Conditions for these criteria to hold are described in detail in references such as Myers and Montgomery (2005).  In cases where there are constraints on the possible design-point values, you may want to specify \code{inscribed = TRUE}.  This will scale-down the design so that no coded value exceeds 1.
 
 \code{wbreps} values greater than 1 cause cube points or star points to be replicated in the same block.  \code{bbreps} values greater than 1 cause additional blocks to be added to the design.  By default, the design is randomized so that the run order in each block is random.  The order of appearance of the blocks is not randomized.
 
@@ -64,6 +65,13 @@ library(rsm)
 des = ccd(3, n0=c(4,6), coding = list(x1 ~ (Temp - 150)/10, 
           x2 ~ (Pres - 50)/5, x3 ~ Feedrate - 4))
 decode.data(des)
+
+### Same as above, except make the design rotatable,
+###   and inscribed so that no coded value exceeds 1
+des2 = ccd(3, n0=c(4,6), alpha = "rotatable", inscribed = TRUE,
+    coding = list(x1 ~ (Temp - 150)/10, 
+          x2 ~ (Pres - 50)/5, x3 ~ Feedrate - 4))
+decode.data(des2)
 
 ### Generate a 5-variable design in 2 blocks.  The cube block has 16 runs
 ### This design will have alpha = 2; it is both orthogonal and rotatable

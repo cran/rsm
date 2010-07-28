@@ -11,9 +11,10 @@
   and produce appropriate analyses and summaries.
 }
 \usage{
-rsm (..., data)
+rsm (...)
 \method{summary}{rsm} (object, ...)
 \method{print}{summary.rsm}(x, ...)
+
 loftest (object)
 canonical (object)
 \method{codings}{rsm}(object)
@@ -26,9 +27,6 @@ canonical (object)
   In \code{summary}, and \code{print}, additional arguments 
   are passed to their generic methods.
   }
-  \item{data}{Optional \code{data.frame} as in \code{lm}.  This could also be
-  a \code{\link{coded.data}} object, in which case additional information
-  is included in subsequent summaries.}
   \item{object}{An object of class \code{rsm}}
   \item{x}{An object produced by \code{summary}}
 }
@@ -39,14 +37,15 @@ canonical (object)
   and is the safe, preferred way of specifying a full second-order model.
 }
 \value{
-  \code{rsm} returns an \code{rsm} object, which is a \code{lm} object with 
+  \code{rsm} returns an \code{rsm} object, which is a \code{\link{lm}} object with 
   additional members as follows:
     \item{order}{The order of the model: 1 for first-order, 1.5 for first-order plus interactions, 
      or 2 for a model that contains square terms.}
     \item{b}{The first-order response-surface coefficients.}
     \item{B}{The matrix of second-order response-surface coefficients, if present.}
     \item{labels}{Labels for the response-surface terms.  These make the summary much more readable.}
-    \item{coding}{Coding formulas, if \code{data} is a \code{\link{coded.data}} object.}
+    \item{coding}{Coding formulas, if provided in the \code{codings} argument or
+      if the \code{data} argument passed to \code{\link{lm}} is a \code{\link{coded.data}} object.}
   \code{summary} 
   is the summary method for \code{rsm} objects.  It returns an object of class
   \code{summary.rsm}, which is an extension of the \code{summary.lm}

@@ -48,17 +48,19 @@ PE = function(...)
 
 
 # Fit a response-surface model
-rsm = function (..., data) {
-    CALL = match.call(lm)
+rsm = function (...) {
+    CALL = match.call(stats::lm)
     CALL[[1]] = as.name("lm")
+    data = eval(CALL$data, parent.frame())
     oc = as.character(deparse(CALL$formula))
     nc = sub("SO\\(([a-zA-Z0-9, ._]+)\\)", "FO\\(\\1\\) + TWI\\(\\1\\) + PQ\\(\\1\\)", oc)
   # no comma -> only 1 var -> no TWI ...
     nc = sub("TWI\\([a-zA-Z0-9 ._]+\\)", "", nc)
     CALL$formula = formula(nc)
-    LM = eval(CALL)
+    LM = eval(CALL, parent.frame())
     LM$call[[1]] = as.name("rsm")
     LM$call$formula = formula(oc)
+    LM$data = data
     
     nm = names(LM$coef)
     i.fo = grep("FO\\(", nm)
@@ -111,11 +113,11 @@ rsm = function (..., data) {
     if (LM$order==1) 
         aliased = any(is.na(LM$b))
     else 
-    	aliased = any(is.na(cbind(LM$B, LM$b)))
+        aliased = any(is.na(cbind(LM$B, LM$b)))
     if (aliased)
-    	warning("Some coefficients are aliased - cannot use 'rsm' methods.\n  Returning an 'lm' object.")
+        warning("Some coefficients are aliased - cannot use 'rsm' methods.\n  Returning an 'lm' object.")
     else {
-        if (!missing(data)) 
+        if (!is.null(data)) 
             if (inherits(data, "coded.data")) 
                 LM$coding = attr(data, "codings")
         class(LM) = c("rsm", "lm")
@@ -130,6 +132,7 @@ loftest = function (object) {
     pieces = as.character(object$call$formula)
     pieces[3] = sub("(FO)|(SO)", "PE", pieces[3])
     cl$formula = formula(paste(pieces[2], "~", pieces[3]))
+    cl$data = object$data
     lof = anova(object, eval(cl))
     df = c(lof[1,1], lof[2,3], lof[2,1])
     ss = c(lof[1,2], lof[2,4], lof[2,2])

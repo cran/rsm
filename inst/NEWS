@@ -1,5 +1,27 @@
 NEWS for rsm package
 
+Changes in version 1.40 (July 28, 2010)
+
+  * Fixed scoping bugs in 'model.data' (affects 'contour.lm' etc.)
+  
+  * Fixed scoping bugs in 'rsm'
+  
+  * Fix to 'rsm' -- coding worked incorrectly when 'data' keyword
+    was not given explicitly.  Side effect: 'data' is no longer a 
+    separate argument, it's just part of '...'
+  
+  * Added 'inscribed' optional argument to 'ccd'
+    (Thanks to Ron Behlinger for suggesting this)
+  
+  * 'contour.lm' checks to ensure that elements of 'at' and 'bounds',
+    if provided, are named.
+  
+  * New 'atlab' argument in 'contour.lm' and related functions.
+    Now by default, the 'at' values are displayed for variables not on
+    the coordinate axes; 'atlab' specifies where this information is
+    shown, or suppresses it.
+  
+
 Changes in version 1.31 (December 19, 2009)
 
   * Fixed logic bug in contour.lm - didn't handle xlabs correctly
