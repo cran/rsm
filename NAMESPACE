@@ -1,0 +1,18 @@
+import(stats)
+import(graphics)
+
+export(FO, PE, PQ, SO, TWI, as.coded.data, bbd, canonical, canonical.path, ccd, ccd.pick, 
+    code2val, coded.data, codings, decode.data, loftest, model.data, parse.coding, 
+    rsm, steepest, val2code, ChemReact, heli)
+
+## OMITTED codings.coded.data, codings.rsm, contour.lm, image.lm, persp.lm, 
+## OMITTED print.coded.data, print.summary.rsm, summary.rsm, 
+
+S3method(codings, coded.data)
+S3method(codings, rsm)
+S3method(contour, lm)
+S3method(image, lm)
+S3method(persp, lm)
+S3method(print, coded.data)
+S3method(print, summary.rsm)
+S3method(summary, rsm)

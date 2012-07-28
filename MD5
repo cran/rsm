@@ -1,13 +1,14 @@
-dd192d790c6ab9cc54bc8cadd29cee13 *DESCRIPTION
+dedaddfb127f8b8a954ce2ee39eafce4 *DESCRIPTION
+35bdcb4becd3b8047da24bcbf4ff836a *NAMESPACE
 8ce62aaf5c9db8049180b455cb850f72 *R/bbd.R
 97e4a3a9a503ad3545e70ca984f5a74d *R/ccd.R
 a1b2bf610df9e878e2fadc72a68a88f7 *R/ccd.pick.R
 e1756cb7b77613542b2dcabf7f3abee5 *R/coding.R
 b661c60192e3e1adbcc4b9d24bdebd3b *R/contour-lm.R
 b5c327b136a00d9267423d84fe499961 *R/rsm.R
-c18e6a48cf7cc8b3d6d0624c6b37dc99 *R/sysdata.rda
+d0310f6b602f7b4a0e16352bc395fe2b *R/sysdata.rda
 02ea4b5ac0c5ee20788d4cd1c4c2d333 *inst/CITATION
-1b020fd9ad17aa971327b2efc096fc6a *inst/NEWS
+f97b9f3e3e7f0221cded3b742b6b94db *inst/NEWS
 716b33292fd1074669dfe1a388ddeb1c *inst/doc/rsm-plots-basics.pdf
 7652481ea4026f59c6a4eb2803c23aeb *inst/doc/rsm-plots-cont1.pdf
 502bfb25b79862a6a833ed04928014b5 *inst/doc/rsm-plots-cont2.pdf
@@ -15,7 +16,6 @@ d2916d380825a5d212c1735ef45a0db5 *inst/doc/rsm-plots-lessbas.pdf
 ed0640400ff1d41809a3d1de6c3e4635 *inst/doc/rsm-plots-persp.pdf
 d108b502270ba8a16fb5d0ecb7aff097 *inst/doc/rsm-plots.Rtex
 f20c8bd32519b1fef697d673ab2c6b0f *inst/doc/rsm-plots.pdf
-0fc589e3c39ec39cc1055cc02ddcf4f8 *inst/doc/rsm-plots.tex
 cfb85146f60a1f312eb41b8e9b7efad6 *inst/doc/rsm.Rtex
 05d5659cd9685712c1cb0fe714992614 *inst/doc/rsm.bib
 c4f25a3266ebab252c25bcc6b669ef8d *inst/doc/rsm.pdf

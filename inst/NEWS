@@ -1,5 +1,10 @@
 NEWS for rsm package
 
+Changes in version 1.41 (July 28, 2012)
+
+  * Added a NAMESPACE so it will work in newer versions of R
+  
+
 Changes in version 1.40 (July 28, 2010)
 
   * Fixed scoping bugs in 'model.data' (affects 'contour.lm' etc.)
