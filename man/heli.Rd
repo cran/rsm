@@ -24,7 +24,7 @@
   }
 }
 \source{
-  Table 12.5 of Box, GEP, Hunter, JS, and Hunter, WG (2005),
+  Table 12.5 of Box, GEP, Hunter, JS, and Hunter, WG (2005)
   \emph{Statistics for Experimenters} (2nd ed.), Wiley.
 }
 \keyword{datasets}

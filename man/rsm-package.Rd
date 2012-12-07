@@ -9,11 +9,10 @@ The \code{rsm} package provides functions useful for designing and analyzing
 experiments that are done sequentially in hopes of optimizing a response surface.
 
 The function \code{\link{ccd}} can generate (and randomize) a central-composite 
-design; it allows the user to specify an aliasing or fractional blocking structure, and
-does a sanity check to make sure it is suitable for estimating a second-order model.
+design; it allows the user to specify an aliasing or fractional blocking structure.
 The function \code{\link{bbd}} generates and randomizes a Box-Behnken design.  
 The function \code{\link{ccd.pick}} is useful for identifying good parameter choices
-in central-composite designs.
+in central-composite designs. Functions \code{cube}, \code{star}, \code{foldover}, \code{dupe}, and \code{join} are also provided to build-up designs from individual blocks. The function \code{varfcn} allows the experimenter to examine the predictive capabilities of a design before collecting data.
 
 The function \code{\link{rsm}} is an enhancement of \code{\link{lm}} that provides 
 for additional analyses peculiar to response surfaces.  It requires a model formula 
@@ -34,8 +33,8 @@ or of any other \code{lm} object where a surface is fitted.  \code{\link{model.d
 recovers the data used in a \code{lm} call, but unlike \code{model.frame}, no
 polynomials, factors, etc. are expanded.
 
-For more information and examples, use \code{vignette("rsm")}.  
-Additionally, \code{vignette("rsm-plots")} provides some illustrations 
+For more information and examples, use \samp{vignette("rsm")} and \samp{vignette("rs-illus")}.  
+Additionally, \samp{vignette("rsm-plots")} provides some illustrations 
 of the graphics functions.
 }
 \author{
@@ -44,10 +43,10 @@ Russell V. Lenth
 Maintainer: Russell V. Lenth <russell-lenth@uiowa.edu>
 }
 \references{
-Box, GEP, Hunter, JS, and Hunter, WG (2005), 
+Box, GEP, Hunter, JS, and Hunter, WG (2005) 
 \emph{Statistics for Experimenters} (2nd ed.), Wiley-Interscience.
 
-Lenth RV (2009). ``Response-Surface Methods in R, Using rsm'', 
+Lenth RV (2009) ``Response-Surface Methods in R, Using rsm'', 
   \emph{Journal of Statistical Software}, 32(7), 1--17. 
   \url{http://www.jstatsoft.org/v32/i07/.}
 

@@ -2,81 +2,141 @@
 \alias{coded.data}
 \alias{as.coded.data}
 \alias{decode.data}
+\alias{recode.data}
+\alias{is.coded.data}
 \alias{val2code}
 \alias{code2val}
 \alias{print.coded.data}
-\alias{parse.coding}
+\alias{[.coded.data}
+%%%\alias{.parse.coding}
 \alias{codings}
 \alias{codings.coded.data}
+\alias{codings<-}
+\alias{names<-.coded.data}
+\alias{truenames}
+\alias{truenames.coded.data}
+\alias{truenames<-}
+\alias{truenames<-.coded.data}
+
+
 \title{Functions for coded data}
 \description{
   These functions facilitate the use of coded data in response-surface analysis.
 }
 \usage{
-coded.data(data, ..., formulas = list(...))
-as.coded.data(data, ..., formulas = list(...))
-
+coded.data(data, \dots, formulas = list(\dots), block = "block")
+as.coded.data(data, \dots, formulas = list(\dots), block = "block")
 decode.data(data)
+recode.data(data, \dots, formulas = list(\dots))
+
 val2code(X, codings)
 code2val(X, codings)
 
-\method{print}{coded.data}(x, ...)
+\method{print}{coded.data}(x, \dots, decode = TRUE)
+
+### --- Methods for managing coded data ---
+is.coded.data(x)
+
+\method{[}{coded.data}(x, \dots)
 
 codings(object)
 \method{codings}{coded.data}(object)
-parse.coding(form)
+codings(object) <- value
+
+\method{names}{coded.data}(x) <- value
+
+## Generic method for true variable names (i.e. decoded names)
+truenames(x)
+\method{truenames}{coded.data}(x)
+## Generic replacement method for truenames
+truenames(x) <- value
+\method{truenames}{coded.data}(x) <- value
 }
 \arguments{
-  \item{data}{A data.frame}
-  \item{\dots}{Formulas for producing coded variables.}
-  \item{formulas}{Provides an alternative way to provide the coding formulas.
-  This is useful if you want to retrieve the codings from one dataset and use them for another.}
+  \item{data}{A \code{data.frame}}
+  \item{formulas}{List of coding formulas; see details}
+  \item{block}{Name(s) of blocking variable(s). It is \code{pmatch}ed (case insensitively) with names in \code{data} to identify blocking factorss}
   \item{X}{A vector, matrix, or data.frame to be coded or decoded.}
-  \item{codings}{a list of formulas (see \code{form})}
-  \item{x}{Coded dataset to be printed.}
-  \item{form}{A formula as described above for \code{\dots}}
-  \item{object}{An object that contains coding formulas}
+  \item{codings}{A list of formulas; see Details}
+  \item{decode}{Logical. If \code{TRUE}, the decoded values are displayed; if \code{FALSE}, the codings are displayed.}
+  \item{object}{A \code{coded.data} object}
+  \item{x}{A \code{coded.data} object}
+  \item{value}{Replacement value for \code{<-} methods}
+  \item{\dots}{In \code{coded.data}, \code{as.coded.data}, and \code{recode.data}, \code{\dots} allows specifying formulas as arguments rather than as a list. In other functions, \code{\dots} is passed to the parent methods.}
 }
 \details{
-  Typically, coding formulas are of the form \code{x ~ (var - center) / div} 
-  where \code{x} and \code{var} are variable names, and \code{center} and \code{div} are numbers.  
+  Typically, coding formulas are of the form \code{x ~ (var - center) / halfwd} 
+  where \code{x} and \code{var} are variable names, and \code{center} and 
+  \code{halfwd} are numbers.  
   The left-hand side gives the name of the coded variable, and the right-hand side 
-  should be a linear expression in  the uncoded variable.  This expression is evaluated at
-  variable values of 0 and 1, then the results are used to
-  solve for the scale center and divisor.  These results are rounded to 4 digits
-  to help ensure that zeros come out exactly.
-}
-\value{
-  \code{coded.data} and \code{as.coded.data} return an object of class \code{coded.data},
-  which inherits from \code{\link{data.frame}}.  \code{print.coded.data} is the print 
-  method for this class; it simply prints the data.frame and then the formulas.
-  A named \code{\link{list}} of the coding formulas is saved in 
-  \code{attr(, "codings")}.
+  should be a linear expression in the uncoded variable (linearity is \emph{not} explicitly 
+  checked, but nonlinear expressions will not decode correctly.) 
+    
+  An S3 \code{print} method is provided for the \code{coded.data} class; 
+  it displays the data.frame in either coded or 
+  decoded form, along with the coding formulas. Some users may prefer \code{print.data.frame} 
+  or \code{as.data.frame} in lieu of \code{print} with \samp{decode=FALSE}; they produce the 
+  same output without displaying the coding formulas.
   
-  Use \code{coded.data} to convert a data.frame in which the variables
+  Use \code{coded.data} to convert a \code{data.frame} in which the variables
   are on their original scales.  The variables named in the formulas are 
   coded and replaced with their coded versions (and also renamed).
-  In contrast, \code{as.coded.data} does not modify any of the data; it assumes the variables
-  are already coded, and the coding information is simply added.
   
-  \code{decode.data} converts a dataset of class \code{coded.data} and returns \code{data.frame} 
-  containing the original variables.
+  In contrast, \code{as.coded.data} does not modify any of the data; it assumes the variables
+  are already coded, and the coding information is simply added. In addition, if \code{data} is 
+  already a \code{coded.data} object from a pre-1.41 version of \pkg{rsm}, 
+  it is converted to 
+  be compatible with new capabilities such as \code{\link{join}} (no \code{formulas} argument 
+  is needed in this case). Any blocking factors should be specified in the \code{blocks} 
+  argument.
+  
+  \code{decode.data} converts a dataset of class \code{coded.data} and 
+  returns a \code{data.frame} containing the original variables.
+  
+  \code{recode.data} is used to convert a \code{coded.data} object to new codings. 
+  Important: this \emph{changes} the coded values to match the new coding formulas. If you want to keep the coded values the same, but change the levels they represent, use \samp{codings(object) <- \dots} or \code{\link{dupe}}.
   
   \code{code2val} converts coded values to the original scale using the codings provided, 
   and returns an object of the same class as \code{X}.  
   \code{val2code} converts the other direction.  When using these functions, it is 
-  essential that the names (or column names in the case of matrices) match those of the corresponding 
-  coded or uncoded variables.
+  essential that the names (or column names in the case of matrices) match those of the 
+  corresponding coded or uncoded variables.
+    
+  \code{codings} is a generic function for accessing codings.  It
+  returns the list of coding formulas from a \code{coded.data} object.  One may use an 
+  expression like \samp{codings(object) <- list(\dots)} to change the codings (without changing 
+  the coded values themselves).   See also \code{\link{codings.rsm}}.
   
-  \code{parse.coding} is mostly for internal use; it extracts and returns a \code{list} with two vectors:
-  a character vector \code{names} with the two variable names, 
-  and a numeric vector \code{const} with the center and divisor.
+  \code{is.coded.data(x)} returns \code{TRUE} if \code{x} inherits from \code{coded.data}, and \code{FALSE otherwise.}
   
-  \code{codings} is a generic function for accessing codings.  \code{codings.coded.data} returns the 
-  list of coding formulas from a \code{coded.data} object.  See also \code{\link{codings.rsm}}.
+  The extraction function \code{x[\dots]} and the naming functions \code{names<-}, 
+  \code{truenames}, and \code{truenames<-} are provided to preserve the integrity of 
+  codings. For example, if \code{x[, 1:3]} excludes any coded columns, their coding formulas 
+  are also excluded. If all coded columns are excluded, the return value is unclassed 
+  from \code{coded.data}. When variable names are changed using \code{names(x) <- \dots}, the coding 
+  formulas are updated accordingly. The \code{truenames} function returns the names of the 
+  variables in the decoded dataset. We can change the decoded names using 
+  \code{truenames(x) <- \dots}, and the coding formulas are updated. Note that \code{truenames}
+  and \code{truenames<-} work the same as \code{names} and \code{names<-} for 
+  unencoded variables in the object.
+  
+  Another convenient way to copy and change the coding formulas a coded dataset (and optionally re-randomize it) is to use the \code{\link{dupe}} function with a \code{coding} argument.
+  
+  When a design is created in another package, some of the variables may be \code{factor}s, in which case they are converted using \code{as.numeric} (values of 1, 2, ...). These levels may be regarded as a yet different coding of the variables, and so it may take two steps to get it in the desired form: one to convert the supplied levels to the desired range (often -1 to 1), and the other to replace the coding formulas to correspond to the real values of the variables to be used. See the examples.
+}
+\value{
+  \code{coded.data}, \code{as.coded.data}, and \code{recode.data} return an object of class  
+  \code{coded.data},  which inherits from \code{\link{data.frame}}. A \code{coded.data} 
+  object is stored in coded form, and its \code{names} attribute contains the coded names, 
+  where they apply. Thus, when fitting models in \code{\link{rsm}} or \code{\link{lm}} with 
+  coded data as the \code{data} argument, the model formula should be given in terms of the 
+  coded variables.
 }
 
-\seealso{\code{\link{data.frame}}}
+\note{Starting with \pkg{rsm} version 2.00, the \code{coded.data} class involves additional attributes to serve broader needs in design-generation. Because of this, old \code{coded.data} objects may need to be updated using \code{as.coded.data} if they are to be used with the newer functions such as \code{\link{join}}.}
+
+
+\seealso{\code{\link{data.frame}}, \code{\link{join}}, \code{\link{dupe}}, \code{\link{rsm}}}
 \references{
 Lenth RV (2009). ``Response-Surface Methods in R, Using rsm'', 
   \emph{Journal of Statistical Software}, 32(7), 1--17. 
@@ -86,10 +146,30 @@ Lenth RV (2009). ``Response-Surface Methods in R, Using rsm'',
 \examples{
 library(rsm)
 
-CR = coded.data (ChemReact, x1~(Time-85)/5, x2~(Temp-175)/5)
-CR
-decode.data (CR)  ### will be same as ChemReact
-
+### Existing dataset with variables on actual scale
+CR <- coded.data (ChemReact, x1 ~ (Time - 85)/5, x2 ~ (Temp - 175)/5)
+CR                            # same as print(CR, decode = TRUE)
+print(CR, decode = FALSE)     # similar to as.data.frame(CR)
 code2val (c(x1=.5, x2=-1), codings = codings(CR))
+
+### Existing dataset, already in coded form
+CO <- as.coded.data(codata, x1 ~ (Ethanol - 0.2)/0.1, x2 ~ A.F.ratio - 15)
+truenames(CO)
+names(CO)
+
+# revert x2 to an uncoded variable
+codings(CO)[2] <- NULL
+truenames(CO)
+
+### Import a design that is coded in a different way (e.g. from some other package)
+# ----- For example, a 3^3 design with each factor having levels (0, 1, 2)
+des3 <- expand.grid(A = 0:2, B = 0:2, C = 0:2)
+# ----- First, create a coded dataset with levels (-1, 0, 1):
+des3c <- coded.data(des3, x1 ~ A - 1,  x2 ~ B - 1,  x3 ~ C - 1)
+# ----- Now randomize and change the codings and variable names for the real situation:
+mydes <- dupe(des3c, coding = c(x1 ~ (Dose - 20)/5,  x2 ~ (Conc - 40)/10,  
+                                x3 ~ (Time - 60)/15))
+head(mydes)                                
 }
 \keyword{regression}
+\keyword{design}

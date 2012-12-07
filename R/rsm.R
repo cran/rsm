@@ -1,58 +1,114 @@
 ### Functions to facilitate response-surface analysis
 
+# Nov 2012 mod: changed naming of effects...
+#   FO(x1,x3) --> FO(x1,x3)x1, FO(x1,x3)x3
+#   TWI(x1,x3) --> TWI(x1,x3)x1:x3
+#   PQ(x1,x3) --> PQ(x1,x3)x1^2, PQ(x1,x3)x3^2
+
 # First-order model
 FO = function(...) {
-  fo = sapply(list(...), I)
-  if (is.null(nrow(fo))) fo = matrix(fo, nrow=1)
-  fo
+    nm = as.character(substitute(list(...)))[-1]
+    fo = sapply(list(...), I)
+    if (is.null(nrow(fo))) fo = matrix(fo, nrow=1)
+    dimnames(fo) = list(NULL, nm)
+    fo
 }
+
+#### I tried developing a formula interface for FO, TWI, and SO. 
+#### Decided it is NOT a good idea
+# # New version of FO that supports a formula
+# FO = function(...) {
+#     env = parent.frame()
+#     .make.matrix = function(vars) {
+#         form = as.formula(paste("~", paste(vars, collapse="+"), "-1"))
+#         model.matrix(form, data=env)
+#     }
+#     if(inherits(form <- list(...)[[1]], "formula"))
+#         .make.matrix(all.vars(form))
+#     else
+#         .make.matrix(sapply(match.call()[-1], as.character))
+# }
 
 # Pure quadratic
 PQ = function(...) {
-  X = FO(...)^2
-  nm = dimnames(X)[[2]]
-  if (is.null(nm)) nm = 1:ncol(X)
-  dimnames(X) = list(NULL, paste(nm,"2",sep="^"))
-  X
+    X = FO(...)^2
+    nm = dimnames(X)[[2]]
+    if (is.null(nm)) nm = 1:ncol(X)
+    dimnames(X) = list(NULL, paste(nm,"2",sep="^"))
+    X
 }
 
+# # New version of PQ that supports a formula
+# # Identical to FO except for squaring and renaming
+# PQ = function(...) {
+#     env = parent.frame()
+#     .make.matrix = function(vars) {
+#         form = as.formula(paste("~", paste(vars, collapse="+"), "-1"))
+#         X = model.matrix(form, data=env)^2
+#         dimnames(X)[[2]] = paste(vars,"2", sep="^")
+#         X
+#     }
+#     if(inherits(form <- list(...)[[1]], "formula"))
+#         .make.matrix(all.vars(form))
+#     else
+#         .make.matrix(sapply(match.call()[-1], as.character))
+# }
+
+
 # Two-way interactions
-TWI = function(...) {
-  fo = FO(...)
-  k = ncol(fo)
-  fon = dimnames(fo)[[2]]
-  if (is.null(fon)) fon=1:k
-  X = matrix(0, nrow=nrow(fo), ncol=k*(k-1)/2)
-  nm = rep("", k*(k-1)/2)
-  col = 1
-  for (i in 1:(k-1)) {
-    for (j in (i+1):k) {
-      X[, col] = fo[ ,i] * fo[ ,j]
-      nm[col] = paste(fon[i],fon[j],sep="")
-      col = col+1
+# Nov 2012 -- aded formula argument
+TWI = function(..., formula) {
+    if (missing(formula)) {
+        fo = FO(...)
+        k = ncol(fo)
+        fon = dimnames(fo)[[2]]
+        if (is.null(fon)) fon=1:k
+        X = matrix(0, nrow=nrow(fo), ncol=k*(k-1)/2)
+        nm = rep("", k*(k-1)/2)
+        col = 1
+        for (i in 1:(k-1)) {
+            for (j in (i+1):k) {
+                X[, col] = fo[ ,i] * fo[ ,j]
+                nm[col] = paste(fon[i],fon[j],sep=":")
+                col = col+1
+            }
+        }
+        dimnames(X) = list(NULL,nm)
+        X
     }
-  }
-  dimnames(X) = list(NULL,nm)
-  X
+    else { # formula is provided
+        if (!inherits(formula, "formula"))
+            formula = as.formula(paste("~", formula))
+        trms = terms(formula)
+        attr(trms, "intercept") = 0
+        X = model.matrix(trms, data=parent.frame())[, attr(trms, "order")==2, drop=FALSE]
+       if(ncol(X) == 0) 
+            stop("Formula yields no two-way interactions. Re-specify or omit 'TWI' term from model")
+        else if (ncol(X) == 1) {
+            new.expr = paste("TWI(", gsub(":", ",", dimnames(X)[[2]]), ")", sep="")
+            stop(paste("Result is just one column. Revise the model using '", 
+                       new.expr, "'", sep=""))
+        }
+        X
+    }
 }
 
 # Second-order model.  But in rsm(), this will get replaced by FO()+TWI()+PQ()
 SO = function(...)
-  X = cbind(FO(...), TWI(...), PQ(...))
+    cbind(FO(...), TWI(...), PQ(...))
 
 
 # Pure-error model
 PE = function(...)
-  factor(paste(...))
+    factor(paste(...))
 
 
 
 # Fit a response-surface model
-rsm = function (...) {
+rsm = function (formula, data, ...) {
     CALL = match.call(stats::lm)
     CALL[[1]] = as.name("lm")
-    data = eval(CALL$data, parent.frame())
-    oc = as.character(deparse(CALL$formula))
+    oc = as.character(deparse(formula))
     nc = sub("SO\\(([a-zA-Z0-9, ._]+)\\)", "FO\\(\\1\\) + TWI\\(\\1\\) + PQ\\(\\1\\)", oc)
   # no comma -> only 1 var -> no TWI ...
     nc = sub("TWI\\([a-zA-Z0-9 ._]+\\)", "", nc)
@@ -60,9 +116,12 @@ rsm = function (...) {
     LM = eval(CALL, parent.frame())
     LM$call[[1]] = as.name("rsm")
     LM$call$formula = formula(oc)
+    if (missing(data))
+        data = as.data.frame(sapply(all.vars(formula), get))
     LM$data = data
-    
-    nm = names(LM$coef)
+
+    newlabs = nm = names(LM$coef)
+names(newlabs) = nm
     i.fo = grep("FO\\(", nm)
     if (length(i.fo) == 0) {
         warning("No FO() terms in model; cannot use RSM methods\nAn 'lm' object has been returned.")
@@ -73,42 +132,54 @@ rsm = function (...) {
     LM$order = 1
     foterm = as.list(LM$terms[LM$assign[min(i.fo)]][[3]])
     fonm = names(LM$b) = sapply(foterm, as.character)[-1]
-    LM$labels = list(FO=list(idx=i.fo, lab=fonm))
-    names(LM$coef)[i.fo] = LM$labels
+#-DEPR    LM$labels = list(FO=list(idx=i.fo, lab=fonm))
+    newlabs[i.fo] = fonm
+#-depr    names(LM$coef)[i.fo] = LM$labels
+    
+    LM$B = matrix(0, k, k)
+    dimnames(LM$B) = list(fonm, fonm)
     
     i.twi = grep("TWI\\(", nm)
-    if ((k > 1) & (length(i.twi) == k*(k-1)/2)) {
+    if ((k > 1) & (length(i.twi) > 0)) {
         btwi = LM$coef[i.twi]
         LM$order = 1.5
-        LM$B = diag(rep(0,k))
-        col = 1
-        twi.lab = rep("", length(i.twi))
-        for (i in 1:(k-1)) {
-          rng = 1:(k-i)
-          LM$B[i,rng+i] = LM$B[rng+i,i] = 0.5 * btwi[col+rng-1]
-          twi.lab[col+rng-1] = paste(fonm[i], fonm[rng+i], sep=":")
-          col = col + k-i
+        twi.lab = sapply(names(btwi), function(s) {
+# Below, usually "TWI(arguments)colname" --> lb = c("TWI", arguments, colname)
+# so that 3rd elt is colname. But if arguments has a formula with parens, could be longer
+# Messy part: If there is only one column in TWI result, colname will be missing
+# In TWI code, I force an error unless call is made w/o a formula so that
+# we can be sure to be able to parse "TWI(x1, x2)" into "x1:x2"
+            lb = strsplit(s, "\\(|\\)")[[1]]
+            if (length(lb) >= 3) rev(lb)[1]
+            else { 
+                tmp = gsub(" ","", lb[2])
+                gsub(",", ":", tmp) 
+            }
+        })
+        names(twi.lab) = NULL
+        for (i in 1:length(twi.lab)) {
+            vn = strsplit(twi.lab[i], ":")[[1]]
+            idx = match(vn, fonm)
+            if (!is.na(btwi[i]))
+                LM$B[idx[1],idx[2]] = LM$B[idx[2],idx[1]] = btwi[i] / 2
+            else
+                twi.lab[i] = paste(twi.lab[i],"@", sep="")
         }
-        dimnames(LM$B) = list(fonm, fonm)
-        LM$labels$TWI = list(idx=i.twi, lab=twi.lab)
+#-DEPR        LM$labels$TWI = list(idx=i.twi, lab=twi.lab)
+        newlabs[i.twi] = twi.lab        
     }
-    else if (length(i.twi) > 0)
-        warning(paste("TWI() term not usable because it has", length(i.twi), "d.f. instead of", k*(k-1)/2))
         
     i.pq = grep("PQ\\(", nm)
-    if (length(i.pq) == k) {
+    if (length(i.pq) > 0) {
         LM$order = 2
-        if (is.null(LM$B)) {
-            if (k > 1)  LM$B = diag(LM$coef[i.pq])
-            else        LM$B = matrix(LM$coef[i.pq], nrow=1)
-            dimnames(LM$B) = list(fonm, fonm)
-        }
-        else
-            diag(LM$B) = LM$coef[i.pq]
-        LM$labels$PQ = list(idx=i.pq, lab=paste(fonm,2,sep="^"))
+        pq.lab = sapply(names(LM$coef[i.pq]), function(s) strsplit(s, "\\)")[[1]][2])
+        names(pq.lab) = NULL
+        vn = sapply(pq.lab, function(s) substr(s, 1, nchar(s)-2))
+        for (i in 1:length(vn)) LM$B[vn[i],vn[i]] = LM$coef[i.pq[i]]
+#-DEPR        LM$labels$PQ = list(idx=i.pq, lab=pq.lab)
+        newlabs[i.pq] = pq.lab        
     }
-    else if (length(i.pq) > 0)
-        warning(paste("PQ() term not usable because it has", length(i.pq), "d.f. instead of", k))
+LM$newlabs = newlabs    
     
     if (LM$order==1) 
         aliased = any(is.na(LM$b))
@@ -146,46 +217,65 @@ loftest = function (object) {
 
 # Summary method
 summary.rsm = function (object, ...) {
-    SUM = summary.lm(object, ...)
-    if (object$order > 0) {
-        for (lst in object$labels)
-            row.names(SUM$coefficients)[lst$idx] = lst$lab
-        if (object$order > 1) {
-            SUM$canonical = list(xs = -0.5 * solve(object$B, object$b), 
-                eigen = eigen(object$B))
-        }
-        else SUM$sa = object$b/sqrt(sum(object$b^2))
-        SUM$lof = rbind(anova(object), loftest(object)[-1,])
-        SUM$coding = object$coding
-        class(SUM) = c("summary.rsm", "summary.lm")
+    # figure out which dots to pass to summary.lm
+    dots = list(...)
+    tidx = pmatch(names(dots), "threshold")
+    if (!all(is.na(tidx))) {
+        threshold = dots[!is.na(tidx)][1]
+        dots[!is.na(tidx)] = NULL
     }
+    else
+        threshold = 1e-4
+    
+    dots$object = object
+    SUM = do.call("summary.lm", dots)
+    if (object$order > 0) {
+        if (!is.null(object$labels))  ### compatibility with old objects
+            for (lst in object$labels)
+                row.names(SUM$coefficients)[lst$idx] = lst$lab
+        else {
+            idx = match(row.names(SUM$coefficients), names(object$newlabs))
+            row.names(SUM$coefficients)[1:length(idx)] = object$newlabs[idx]
+        }
+    }
+    if (object$order > 1)
+        SUM$canonical = canonical(object, threshold=threshold)
+    else SUM$sa = object$b/sqrt(sum(object$b^2))
+    SUM$lof = rbind(anova(object), loftest(object)[-1,])
+    SUM$coding = object$coding
+    class(SUM) = c("summary.rsm", "summary.lm")
     SUM
 }
 
 # Print method for summary
 print.summary.rsm = function(x,...) {
-  getS3method("print", "summary.lm") (x, ...)
-  print(x$lof, signif.stars=FALSE, ...)
-  cat("\n")
-  can = x$canonical
-  if (!is.null(can)) {
-    cat("Stationary point of response surface:\n")
-    print(can$xs)
-    if(!is.null(x$coding)) {
-      cat("\nStationary point in original units:\n")
-      print (code2val (can$xs, x$coding))
+    ### --- replace: getS3method("print", "summary.lm") (x, ...)
+    ### Just show the call and coefs; skip the resid summary
+    cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), 
+        "\n\n", sep = "")
+    printCoefmat(x$coefficients, ...)
+    cat("\n")
+    print(x$lof, signif.stars=FALSE, ...)
+    cat("\n")
+    can = x$canonical
+    if (!is.null(can)) {
+        cat("Stationary point of response surface:\n")
+        print(can$xs)
+        if(!is.null(x$coding)) {
+            cat("\nStationary point in original units:\n")
+            print (code2val (can$xs, x$coding))
+        }
+        cat("\nEigenanalysis:\n")
+        print(can$eigen)
     }
-    cat("\nEigenanalysis:\n")
-    print(can$eigen)
-  }
-  else {
-    cat("Direction of steepest ascent (at radius 1):\n")
-    print(x$sa)
-    cat("\nCorresponding increment in original units:\n")
-    temp = code2val (rbind(x$sa, 2*x$sa), x$coding)
-    print (temp[2,] - temp[1,])
-  }
-  cat("\n")
+    else {
+        cat("Direction of steepest ascent (at radius 1):\n")
+        print(x$sa)
+        cat("\nCorresponding increment in original units:\n")
+        temp = code2val (rbind(x$sa, 2*x$sa), x$coding)
+        print (temp[2,] - temp[1,])
+    }
+    cat("\n")
 }
 
 # Steepest ascent (and ridge analysis)
@@ -253,43 +343,64 @@ steepest = function (object, dist=seq(0,5,by=.5), descent=FALSE) {
 }
 
 canonical.path = function(object, 
-  which = ifelse(descent, length(object$b), 1),
-  dist = seq(-5, 5, by=.5),
-  descent = FALSE)
+                          which = ifelse(descent, length(object$b), 1),
+                          dist = seq(-5, 5, by=.5),
+                          descent = FALSE,
+                          threshold = 1e-04)
 {
-  if (!inherits(object, "rsm"))
-    stop(paste(as.character(substitute(object)),"is not an 'rsm' object"))
-  if (object$order == 1)
-    stop("Requires a seconnd-order response surface")
-  can = summary(object)$canonical
-  dir = can$eigen$vectors[ , which]
-  path = t(sapply(dist, function(d) can$xs + d*dir))
-
-  path = newdata = as.data.frame(round(path, 3))
-  md = model.data(object)
-  for (vn in names(md)) if (is.null(newdata[[vn]])) {
-    v = md[[vn]]
-    if (is.factor(v)) 
-      newdata[[vn]] = factor(levels(v)[1], levels = levels(v))
-    else newdata[[vn]] = mean(v)
-  }
-  yhat = predict(object, newdata = newdata)
-  path[["|"]] = factor("|")
-   if (!is.null(object$coding)) {
-    orig = code2val(path, object$coding)
-    path = cbind(path, orig)
-  }
-  ans = cbind(data.frame(dist = dist), path, yhat = round(yhat, 3))
-  ans
+    if (!inherits(object, "rsm"))
+        stop(paste(as.character(substitute(object)),"is not an 'rsm' object"))
+    if (object$order == 1)
+        stop("Requires a seconnd-order response surface")
+    can = canonical(object, threshold)
+    dir = can$eigen$vectors[ , which]
+    path = t(sapply(dist, function(d) can$xs + d*dir))
+    
+    path = newdata = as.data.frame(round(path, 3))
+    md = model.data(object)
+    for (vn in names(md)) if (is.null(newdata[[vn]])) {
+        v = md[[vn]]
+        if (is.factor(v)) 
+            newdata[[vn]] = factor(levels(v)[1], levels = levels(v))
+        else newdata[[vn]] = mean(v)
+    }
+    yhat = predict(object, newdata = newdata)
+    path[["|"]] = factor("|")
+    if (!is.null(object$coding)) {
+        orig = code2val(path, object$coding)
+        path = cbind(path, orig)
+    }
+    ans = cbind(data.frame(dist = dist), path, yhat = round(yhat, 3))
+    ans
 }
 
-
-# Primitive accessor methods for 'rsm' objects
-
-canonical = function(object) {
-    if (!inherits(object, "rsm")) stop ("Not an 'rsm' object")
-    summary(object)$canonical
+# Canonical analysis -- allows singular B matrix and may set a 
+# higher threshold on e'vals considered to be zero
+canonical = function(object, threshold = 1e-4) {
+    if (!inherits(object, "rsm")) 
+        stop ("Not an 'rsm' object")
+    if (object$order == 1) 
+        stop("Canonical analysis is not possible for first-order models")
+    EA = eigen(object$B)
+    active = which(abs(EA$values) > threshold)
+    if (length(active) == 0)
+        stop("threshold is greater than the largest |eigenvalue|")
+    U = EA$vectors[, active, drop=FALSE]
+    laminv = 1 / EA$values[active]
+    xs = as.vector(-0.5 * U %*% diag(laminv, ncol=ncol(U)) %*% t(U) %*% object$b)
+    names(xs) = names(object$b)
+    dimnames(EA$vectors) = list(names(object$b), NULL)
+    if (length(active) < nrow(U)) {
+        ###EA$vectors[, -active] = 0
+        EA$values[-active] = 0
+    }
+    list(xs=xs, eigen=EA)
 }
+
+xs = function(object, ...) {
+    canonical(object, ...)$xs
+}
+
 
 # Unfortunately, it turns out that rsm's 'codings' member is named "coding".
 # Too late now, as people may have old rsm objects laying around.

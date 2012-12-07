@@ -13,6 +13,7 @@ bbd = function(k, n0=4, block = (k==4|k==5), randomize=TRUE, coding)
              c(3,4,7),c(1,3,5),c(2,3,6))                   # k=7
     )
     
+    CALL = match.call()
     yvars = NULL
     if (inherits(k, "formula")) {
         names = all.vars (k[[length(k)]])
@@ -51,9 +52,11 @@ bbd = function(k, n0=4, block = (k==4|k==5), randomize=TRUE, coding)
             blk = c(rep(1:2, rep(5*n, 2)), rep(1:2, n0))
         else
             stop("Can only block when k=4 or k=5")
-        n0 = ifelse(k==4, 3*n0, 2*n0)
+        nblk = ifelse(k==4, 3, 2)
     }
-    des = rbind(des, matrix(0, nrow=n0, ncol=k))
+    else 
+        nblk = 1
+    des = rbind(des, matrix(0, nrow=n0*nblk, ncol=k))
     names(des) = names
     if (block) {
         des = cbind(factor(blk), des)
@@ -64,16 +67,28 @@ bbd = function(k, n0=4, block = (k==4|k==5), randomize=TRUE, coding)
     
     if (!is.null(yvars))
         for (v in yvars)  des[[v]] = NA
+    
+    if (missing(coding))
+        coding = sapply(names, function(v) as.formula(paste(v,"~",v,".as.is", sep="")))
+    des = as.coded.data (des, formulas=coding)
 
+    # create design info as if each block is a CCD in  one block
+    N = nrow(des) / nblk
+    rsd = list(
+        primary = names,
+        call = CALL
+#         n0 = c(n0,0),
+#         non0 = c(N-n0,0),
+#         alpha = 1
+    )
+     if (block) {
+#         rsd$blk.info = rep(list(rsd), nblk)
+         rsd$block = blkname
+     }
+#     rsd$call = CALL
+    attr(des, "rsdes") = rsd
+
+    des = .randomize(des, randomize=randomize)
     
-    if (randomize) {
-        rn = runif(nrow(des))
-        if (block) rn = rn + as.numeric(des[[blkname]])
-        des = des[order(rn), ]
-    }
-    
-    if (!missing(coding))
-        des = as.coded.data (des, formulas=coding)
-        
     des
 }

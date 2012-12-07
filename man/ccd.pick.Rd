@@ -4,10 +4,10 @@
 \description{
 This function looks at all combinations of specified design parameters
 for central-composite designs, calculates other quantities such as
-the 'alpha' values for rotatability and orthogonal blocking, imposes 
-specified restrictions, and outputs the best combinations in a order.
+the \code{alpha} values for rotatability and orthogonal blocking, imposes 
+specified restrictions, and outputs the best combinations in a specified order.
 This serves as an aid in identifying good designs.  The design itself can 
-then be generated using \code{\link{ccd}}.
+then be generated using \code{\link{ccd}}, or in pieces using \code{\link{cube}}, \code{\link{star}}, etc.
 }
 \usage{
 ccd.pick(k, n.c = 2^k, n0.c = 1:10, blks.c = 1, n0.s = 1:10, bbr.c = 1, 
@@ -31,7 +31,7 @@ ccd.pick(k, n.c = 2^k, n0.c = 1:10, blks.c = 1, n0.s = 1:10, bbr.c = 1,
   expressions are \code{TRUE} are retained.}
 }
 \details{
-  A grid is created with all combinations of \code{n.c}, \code{n0.c}, ..., \code{bbr.s}.
+  A grid is created with all combinations of \code{n.c}, \code{n0.c}, \dots, \code{bbr.s}.
   Then for each row of the grid, several additional variables 
   are computed:
   \describe{
@@ -46,8 +46,7 @@ ccd.pick(k, n.c = 2^k, n0.c = 1:10, blks.c = 1, n0.s = 1:10, bbr.c = 1,
     \code{alpha.rot} and \code{alpha.orth}.  This measures agreement between 
     the two \code{alpha}s.}
   }
-  If \code{restrict} is provided, each expression is evaluated
-  and only the rows where the expression is \code{TRUE} are kept.  
+  If \code{restrict} is provided, only the cases where the expressions are all \code{TRUE} are kept.  
   (Regardless of \code{restrict}, rows are eliminated where there are 
   insufficient degrees of freedom to estimate all needed effects for a 
   second-order model.)
@@ -63,11 +62,11 @@ ccd.pick(k, n.c = 2^k, n0.c = 1:10, blks.c = 1, n0.s = 1:10, bbr.c = 1,
   as described above.
 }
 \references{
-Lenth RV (2009). ``Response-Surface Methods in R, Using rsm'', 
+Lenth RV (2009) ``Response-Surface Methods in R, Using rsm'', 
   \emph{Journal of Statistical Software}, 32(7), 1--17. 
   \url{http://www.jstatsoft.org/v32/i07/.}
 
-Myers, RH, Montgomery, DC, and Anderson-Cook, CM (2009), 
+Myers, RH, Montgomery, DC, and Anderson-Cook, CM (2009)
 \emph{Response Surface Methodology} (3rd ed.), Wiley.
 }
 \author{Russell V. Lenth}
@@ -77,8 +76,8 @@ library(rsm)
 
 ### List CCDs in 3 factors with between 10 and 14 runs per block
 ccd.pick(3, n0.c=2:6, n0.s=2:8)
-### Generate the design that is listed first.  
-ccd(3, n0=c(6,4))
+# (Generate the design that is listed first:) 
+# ccd(3, n0=c(6,4))
 
 ### Find designs in 5 factors containing 1, 2, or 4 cube blocks
 ### of 8 or 16 runs, 1 or 2 reps of each axis point,

@@ -25,7 +25,7 @@ model.data(lmobj, lhs = FALSE)
   A data frame containing each of the variables referenced in the model formula.
 }
 \references{
-Lenth RV (2009). ``Response-Surface Methods in R, Using rsm'', 
+Lenth RV (2009) ``Response-Surface Methods in R, Using rsm'', 
   \emph{Journal of Statistical Software}, 32(7), 1--17. 
   \url{http://www.jstatsoft.org/v32/i07/.}
 }
@@ -34,7 +34,7 @@ Lenth RV (2009). ``Response-Surface Methods in R, Using rsm'',
 \seealso{\code{\link{model.matrix}}, \code{\link{model.frame}}}
 \examples{
 library(rsm)
-trees.lm = lm(log(Volume) ~ poly(log(Girth),3), data=trees, subset=1:20)
+trees.lm <- lm(log(Volume) ~ poly(log(Girth),3), data = trees, subset = 1:20)
 model.frame(trees.lm)
 model.data(trees.lm)
 }

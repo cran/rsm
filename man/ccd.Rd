@@ -1,87 +1,149 @@
 \name{ccd}
+
+\alias{cube}
+\alias{star}
+\alias{dupe}
+\alias{foldover}
 \alias{ccd}
-\title{Generate a central-composite design}
+\title{Generate central-composite designs and associated building blocks}
 \description{
-This function can generate a broad range of central-composite designs with flexible choices of replications, aliasing of predictors and fractional blocks, and choices of axis or 'star' points.
+These functions generate central-composite designs, or building blocks thereof.
+They allow for flexible choices of replications, aliasing of predictors and fractional blocks, and choices of axis or \sQuote{star} points.
 }
 \usage{
+cube(basis, generators, n0 = 4, reps = 1, coding, randomize = TRUE, 
+    blockgen, bid = 1, inscribed = FALSE)
+star(basis, n0 = 4, alpha = "orthogonal", reps = 1, randomize = TRUE)
+dupe(design, randomize = TRUE, coding)
+foldover(basis, variables, bid, randomize = TRUE)
 ccd(basis, generators, blocks = "Block", n0 = 4, alpha = "orthogonal", 
-    wbreps = 1, bbreps = 1, randomize = TRUE, inscribed = FALSE, coding)
+    wbreps = 1, bbreps = 1, randomize = TRUE, inscribed = FALSE, 
+    coding, oneblock = FALSE)
 }
 \arguments{
-  \item{basis}{A formula, or an integer giving the number of variables.  If the formula has a left-hand side, the variables named there are appended to the design and initialized to \code{NA}.}
-  \item{generators}{Optional formula or list of formulas to generate aliased variables}
-  \item{blocks}{A string or a formula.  If a character string, it is the name of the blcoking factor; if a formula, the left-hand side is used as the name of the blcoking factor, and the formula(s) on the right-hand side are used to generate separate fractional blocks.}
-  \item{n0}{Integer or vector of two integers giving the number of center points.
-    If only one value, this is the number of center pouints in each block.
-    If two values are given, \code{n0[1]} specifies the number of center points in 
-    'cube' blocks, and \code{n0[2]} specifies the number of center points in 'star' blocks.}
-  \item{alpha}{If numeric, the position of the 'star' points.  May also be a character string; if it matches \code{"orthogonal"},the star points are positioned to block the design orthogonally; if it matches \code{"rotatable"}, the star points are chosen to make the design rotatable.  The default is to generate an orthogonally blocked design.  Note that a face-centered design is obtained by specifying \code{alpha = 1}.}
-  \item{wbreps}{Number(s) of within-block replications.  If this is a vector of length 2, then separate numbers are used for the 'cube' and the 'axis' blocks respectively.}
-  \item{bbreps}{Number(s) of between-block replications (i.e., number of repeats of each block).  f this is a vector of length 2, then separate numbers are used for the 'cube' and the 'axis' blocks respectively.}
-  \item{randomize}{Boolean determining whether or not to randomize the design.  Each block is randomized separately.}
-  \item{inscribed}{Boolean value.  If \code{FALSE}, the cube points are at +/- 1 and the axis points are at least 1.  If \code{TRUE}, the entire desgn is scaled down so that the axis points are at +/- 1 and the cube points are at interior positions.}
-  \item{coding}{Optional list of formulas.  If this is provided, a \code{\link{coded.data}} object is returned with the specified coding.}
+\item{basis}{In \code{cube} and \code{ccd}, a formula, or an integer giving the number of variables.  If the formula has a left-hand side, the variables named there are appended to the design and initialized to \code{NA}. 
+In \code{star}, \code{dupe}, and \code{foldover}, \code{basis} is a \code{coded.data} object to use as a reference.}
+\item{generators}{Optional formula or list of formulas to generate aliased variables}
+\item{n0}{Integer giving the number of center points. In \code{ccd}, this can be a vector of     
+  two numbers for the numbers of center points in the cube blocks and the star blocks, 
+  respectively.}
+\item{reps}{Integer number of replications of the cube or the star. (This does \emph{not} create replicate blocks; use \code{\link{join}} to do that.)}
+  \item{coding}{List of coding formulas for the design variables (those in \code{basis} and \code{generators}).  In \code{dupe}, \code{coding} may be used to change the coding formulas, e.g. in a situation where we want to use the same design as before but center it elsewhere.}
+  \item{randomize}{Logical value determining whether or not to randomize the design.  In \code{ccd}, each block is randomized separately.}
+\item{blockgen}{A formula, string, or list thereof. Each element is evaluated, and the distinct combinations define fractional blocks for the design. Unlike \code{ccd}, \code{cube} returns only one of these blocks.}
+\item{bid}{(For block ID.) An integer index (from 1 to number of blocks) of the fractional block to return. The indexes are defined by the standard ordering of the block generators; e.g. if \code{blockgen} is of length 2, the \code{bid} values of (1, 2, 3, 4) correspond to generated levels of \code{(--, +-, -+, ++)} respectively.}
+\item{inscribed}{Logical value; if \code{FALSE}, the cube points are at +/- 1 in each variable.  If \code{TRUE}, the entire desgn is scaled down so that the axis points are at +/- 1 and the cube points are at interior positions.  In \code{cube} only, \code{inscribed} may be given a numeric value: use the value of \code{alpha} anticipated when axis points are added; or use \samp{inscribed = TRUE} to scale in anticipation of \samp{alpha = "spherical"}.}
+\item{alpha}{If numeric, the position of the \sQuote{star} points.  May also be a character string that matches or partially matches one of these:
+\describe{
+  \item{\code{"orthogonal"}}{the star points are positioned to block the design orthogonally}
+  \item{\code{"rotatable"}}{the star points are chosen to make the design rotatable}
+  \item{\code{"spherical"}}{the star points are the same distance as the corners of the design cube (alpha is the square root of the number of design factors)}
+  \item{\code{"faces"}}{the star points are face-centered (same as \samp{alpha = 1})}
+}
+The user may specify a vector value of \code{alpha} if it is desired to vary them on different axes. The values are rotated cyclically as needed.
+}
+\item{design}{A \code{coded.data} object to be duplicated.}
+  \item{blocks}{A string or a formula.  If a character string, it is the name of the blocking factor; if a formula, the left-hand side is used as the name of the blocking factor. The formula(s) on the right-hand side are used to generate separate fractional blocks.}
+\item{variables}{Character vector of names of variables to fold over.}  
+  \item{wbreps}{Number(s) of within-block replications.  If this is a vector of length 2, then separate numbers are used for the \sQuote{cube} and the \sQuote{star} blocks respectively.}
+  \item{bbreps}{Number(s) of between-block replications (i.e., number of repeats of each block).  If this is a vector of length 2, then separate numbers are used for the \sQuote{cube} and the \sQuote{star} blocks respectively.}
+  \item{oneblock}{Logical. If \code{TRUE}, the blocking factor is removed and the whole design is randomized as a single block. Note that the default number of center points may be larger than you anticipated because they are combined.}
 }
 \details{
-Central-composite designs (CCDs) are popular designs for use in response-surface exploration.  They are blocked designs consisting of at least one 'cube' block (two-level factorial or fractional factorial, plus center points) , and at least one 'star' block (points along each axis at positions \code{-alpha} and \code{+alpha}), plus center points.  Everything is assumed to be on a coded scale, where the cube portion of the design has values of -1 and 1 for each variable, and the center points are 0.  The codings may be provided, if desired, using the \code{coding} argument.
+Central-composite designs (CCDs) are popular designs for use in response-surface exploration.  They are blocked designs consisting of at least one \sQuote{cube} block (two-level factorial or fractional factorial, plus center points), and at least one \sQuote{star} block (points along each axis at positions \code{-alpha} and \code{+alpha}), plus center points.  Everything is put on a coded scale, where the cube portion of the design has values of -1 and 1 for each variable, and the center points are 0.
 
-The \code{basis} argument determines a basic design used to create cube blocks.  For example, \code{basis = ~A+B+C} would generate a basic design of 8 runs.     Use \code{generators} if you want additional variables; for example, \code{generators = c(D~-A*B, E~B*C)} added to the above would generate a 5-factor design with defining relation \code{I = -ABD = BCE = -ACDE}.  
+The \code{ccd} function creates an entire CCD design; however, in practice, we often start with just the cube portion and build from there. Therefore, the functions \code{cube}, \code{star}, \code{dupe}, and \code{foldover} are provided, and one may use \code{\link{join}} to combine them.
 
-If you want the cube points divided into fractional blocks, give the formula(s) in the \code{blocks} argument.  For instance, suppose we have \code{basis = A+B+C+D+E}, \code{generators = F~-A*C*D}, and \code{blocks = Day ~ c(A*B*C, C*D*E)}.  Then the blocking variable will be named \code{"Day"}, and the basic 32-run design (half-fraction of 6 factors) will be divided into 4 blocks of 8 runs each, based on the combination of signs of \code{A*B*C} and \code{C*D*E}.  Notice that \code{Day} will be confounded with its generators, the interaction thereof, and all aliases of these: \code{Day = ABC = CDE = ABDE = -BDF = -ADCF = -BCEF = -AEF}.  To each of these blocks, we will add \code{n0} (or \code{n0[1]}) center points.
+In \code{cube} and \code{ccd}, the \code{basis} argument determines a basic design used to create cube blocks.  
+For example, \samp{cube(basis = ~ A + B + C)} would generate a basic design of 8 factorial points plus center points. 
+Use \code{generators} if you want additional variables in a fractional design; for example, \samp{generators = c(D ~ -A*B, E ~ B*C)} added to the above would generate a 5-factor design with defining relation \code{I = -ABD = BCE = -ACDE}.  For convenience, \code{basis} may be an integer instead of a formula, in which case default variable names of \code{x1, x2, \dots} are used; for example, \samp{cube(3, ~ -x1*x2*x3)} generates a 1/2 fraction design with added center points.
 
-A star block contains \code{n0} (or \code{n0[2]}) center points, plus points at \code{+/- alpha} on each coordinate axis.  You may specify the \code{alpha} you want, or have it chosen to achieve orthogonality of blocks (the default) or rotatability.  Conditions for these criteria to hold are described in detail in references such as Myers and Montgomery (2005).  In cases where there are constraints on the possible design-point values, you may want to specify \code{inscribed = TRUE}.  This will scale-down the design so that no coded value exceeds 1.
+If you want the cube points divided into fractional blocks, give the formula(s) in the \code{blockgen} argument of \code{cube}, or the \code{blocks} argument of \code{ccd}.  For instance, suppose we call \samp{cube(basis = A+B+C+D+E}, \samp{generators = F~-A*C*D)}.
+This design has 32 runs; but adding the argument \samp{blockgen = c("A*B*C","C*D*E")} will
+create a fractional block of 32/4 = 8 runs. (\code{cube} is flexible; we could have used a
+formula instead, either \samp{blockgen = ~ c(A*B*C, C*D*E)} or 
+\samp{blockgen = c(~A*B*C, ~C*D*E)}.) Center points are added to each block as specified. 
+In a call to \code{ccd} with the same \code{basis} and \code{generators}, adding 
+\samp{blocks = Day ~ c(A*B*C, C*D*E)} would do the same thing, only all 4 blocks will be
+included, and a factor named \code{Day} distinguishes the blocks.
 
-\code{wbreps} values greater than 1 cause cube points or star points to be replicated in the same block.  \code{bbreps} values greater than 1 cause additional blocks to be added to the design.  By default, the design is randomized so that the run order in each block is random.  The order of appearance of the blocks is not randomized.
+The functions \code{star}, \code{dupe}, and \code{foldover} provide for creating new design blocks based on an existing design.  They also provide for delayed evaluation: if the \code{basis} argument is missing, these functions simply return the call, \code{\link{join}} will fill-in \samp{basis = design1} and evaluate it. 
 
-A couple of convenience features are added.  If \code{basis} is an integer instead of a formula, default variable names of \code{x1, x2, ...} are used; for example, \code{basis = 3} is equivalent to \code{basis = ~x1+x2+x3}.  You may specify generators or fractional blocks using the same notation.  You may also give variables on the left-hand side when \code{basis} is a formula, and these variables are added to the returned design.  For example, \code{Yield+ProcessTime ~ A+B+C} would generate a design in factors \code{A, B, C} (plus others if there are generators), and additional variables \code{Yield} and \code{ProcessTime} initialized at \code{NA}.
+\code{dupe} simply makes a copy of the design, and re-randomizes it. Therefore it is also a convenient way to re-randomize a design. If \code{coding} is provided, the coding formulas are replaced as well -- for example, to re-center the design.
+
+Use \code{star} to generate star (axis) points, which consist of center points plus points at \code{+/- alpha} on each coordinate axis.  You may specify the \code{alpha} you want, or a character argument to specify a certain criterion be met.  For example, using delayed evaluation, \samp{ccd1 = join(cube1, star(alpha="sph"))} will return a CCD with \code{cube1} as the cube block, and with axis points at the same distance as the corners of the cube. Conditions for the criteria on \code{alpha} are described in detail in references such as Myers \emph{et al.} (2009). 
+
+In \code{star}, determinations of orthogonality and rotatability are based on computed design moments of \code{basis}, rather than any assumptions about the structure of the design being augmented. Thus, it may be possible to augment an unusual design to obtain a rotatable design. Also, if an orthogonal star block is requested, the value of \code{alpha} may vary from axis to axis if that is required to satisfy the condition.
+
+\code{foldover} reverses the levels of one or more  design variables (i.e., those that are coded). By default, it reverses them all. However, if the \code{bid} argument is supplied, it instead returns the \code{bid}th fractional block that \code{cube} would have generated. That is, \samp{foldover(des, bid=3)} is equivalent to \samp{cube(<arguments that created des>, bid=3)} -- only it does so much more efficiently by folding on the appropriate factors.
+
+In cases where there are constraints on the region of operability, you may want to specify \code{inscribed = TRUE}.  This will scale-down the design so that no coded value exceeds 1. If using a building-block approach starting with a first-order design from \code{cube}, call \code{cube}  with \code{inscribed} set to the anticipated value of \code{alpha}, or use \samp{inscribed = TRUE}, and then use \samp{alpha = "spherical"} in the subsequent call to \code{star}.
+
+\code{ccd} generates an entire CCD. In practice, the building-block approach with \code{cube}, \code{star}, etc. is usually preferable, but \code{ccd} exists for convenience and backward compatibility with pre-2.00 versions of \pkg{rsm}. Many of the arguments are the same as those in \code{cube}; however, \code{n0}, \code{wbreps}, \code{bbreps} may be single values or vectors; if vectors, the first element is for the cube portions and the second element is for the star portions. In \code{ccd}, specifying \code{wbreps} is equivalent to specifying \code{reps} in a call to \code{cube} or \code{star}. \code{bbreps} refers to replicate blocks in the experiment, so that \samp{bbreps = c(2,3)} specifies that we join two cube blocks and three blocks of star points.
+
+If \code{coding} is not specified in a new design, default identity codings are created, e.g. \samp{x1 ~ x1.as.is}.
 }
+
 \value{
-A \code{\link{data.frame}} with the generated design; or if \code{coding} is specified, a \code{\link{coded.data}} object.  The blocking variable will be a \code{\link{factor}}; all other variables will be numeric.
+A \code{\link{coded.data}} object with the generated design, with additional variables \code{run.order} and \code{std.order}. If a multi-block design, the generated blocking variable will be a \code{\link{factor}}; all other variables will be numeric. The designs are sorted by blocks and \code{run.order} within blocks; and (unlike pre-1.41 versions of \pkg{rsm}) the \code{row.names} will be integers corresponding to this ordering. The user may sort by block and \code{std.order} within block to display the designs in their pre-randomized order.
 }
 \references{
-Lenth RV (2009). ``Response-Surface Methods in R, Using rsm'', 
+Lenth RV (2009) ``Response-Surface Methods in R, Using rsm'', 
   \emph{Journal of Statistical Software}, 32(7), 1--17. 
   \url{http://www.jstatsoft.org/v32/i07/.}
 
-Myers, RH, Montgomery, DC, and Anderson-Cook, CM (2009), 
+Myers, RH, Montgomery, DC, and Anderson-Cook, CM (2009) 
 \emph{Response Surface Methodology} (3rd ed.), Wiley.
 }
 \author{Russell V. Lenth}
 \note{
-  Poor choices of \code{generators} and/or \code{blocks} can alias or partially alias some effects needed to estimate a second-order response surface.  \code{ccd} runs a trial model on just the cube portion of the experiment, and issues a warning if there are aliased effects.  The presence of center points and axis points may help mitigate this problem and make the surface estimable, but it is best to avoid designs where this aliasing occurs.
+  Poor choices of \code{generators} and/or \code{blocks} can alias or partially alias some effects needed to estimate a second-order response surface.  It is a good idea to run \code{\link{varfcn}} before collecting data to examine the prediction capabilities of the design and to ensure that the desired model can be fitted.
   
-  The function \code{\link{ccd.pick}} is available to help determine good choices for arguments to this function.
-  
-  In  practice, you may generate the whole design, but initially collect data only on one or more 'cube' blocks, which is good enough for estimating a first-order model.  Depending on the results of analysis, we either may follow a path of steepest ascent, or continue with data from the 'star' block(s) (and possibly more 'cube' blocks) so that we can estimate a second-order model.
+  The function \code{\link{ccd.pick}} is available to help determine good choices for arguments to \code{cube}, \code{star}, and \code{ccd}.
   
   An alternative to a CCD when you want to go straight to second-order modeling is a Box-Behnken design, generated by \code{\link{bbd}}.  These designs are not as various or flexible as CCDs, but they can require fewer runs.
 }
-\seealso{\code{\link{ccd.pick}}, \code{\link{coded.data}}, \code{\link{bbd}}}
+\seealso{\code{\link{ccd.pick}}, \code{\link{coded.data}}, \code{\link{varfcn}}, \code{\link{bbd}}}
 \examples{
 library(rsm)
 
-### Generate a standard 3-variable CCD with 12 runs in each block
-des = ccd(3, n0=c(4,6), coding = list(x1 ~ (Temp - 150)/10, 
-          x2 ~ (Pres - 50)/5, x3 ~ Feedrate - 4))
-decode.data(des)
+### Generate a standard 3-variable first-order design with 8 corner points and 4 center points
+( FOdes <- cube (3, n0 = 4, coding = list (
+                x1 ~ (Temp - 150)/10, x2 ~ (Pres - 50)/5, x3 ~ Feedrate - 4)) )
+                                    
+### Add an orthodonal star block with 12 runs to create a second-order CCD
+( SOdes <- join(FOdes, star(n0=6)) )
 
-### Same as above, except make the design rotatable,
-###   and inscribed so that no coded value exceeds 1
-des2 = ccd(3, n0=c(4,6), alpha = "rotatable", inscribed = TRUE,
-    coding = list(x1 ~ (Temp - 150)/10, 
-          x2 ~ (Pres - 50)/5, x3 ~ Feedrate - 4))
-decode.data(des2)
+### Same as above, except make the whole CCD at once; and make it rotatable
+### and inscribed so that no coded value exceeds 1
+SOdes2 <- ccd (3, n0 = c(4,6), alpha = "rotatable", inscribed = TRUE, coding = list (
+                x1 ~ (Temp - 150)/10, x2 ~ (Pres - 50)/5, x3 ~ Feedrate - 4))
 
-### Generate a 5-variable design in 2 blocks.  The cube block has 16 runs
-### This design will have alpha = 2; it is both orthogonal and rotatable
-ccd(~ x1 + x2 + x3 + x4,  x5 ~ x1 * x2 * x3 * x4, n0 = c(6,1))
+### Make two replicate blocks of FOdes (2nd one randomized differently)
+join(FOdes, dupe(FOdes))
 
-### Generate a 5-variable design with 5 blocks:
-### 4 blocks of 8 cube points each, and 1 block with star points 
-### You'll get alpha = 2.366; if you add alpha = "rot", you'll get 2.378
-des = ccd(y1 + y2 ~ A + B + C + D + E, , Shift ~ c(-A*B*C, C*D*E), n0=c(2,4))
+### Fractional blocking illustration (with no center points)
+# Basic design (bid = 1 ---> block generators b1 = -1, b2 = -1)
+block1 <- cube (~ x1 + x2 + x3 + x4,  generators = x5 ~ x1 * x2 * x3 * x4,
+                n0 = 0, blockgen = ~ c(x1 * x2, x1 * x3), bid = 1)
+block1                
+
+# The foldover (on all variables) of block1, in the same order
+foldover(block1, randomize=FALSE)
+
+# The 4th fractional block:
+( block4 <- foldover(block1, bid = 4) )
+
+# Import a design (from some other package) and use it as a building block
+# --- (Example repeated from coded.data documentation) ...
+    des3 <- expand.grid(A = 0:2, B = 0:2, C = 0:2)
+    des3c <- coded.data(des3, x1 ~ A - 1,  x2 ~ B - 1,  x3 ~ C - 1)
+    mydes <- dupe(des3c, coding = c(x1 ~ (Dose - 20)/5,  x2 ~ (Conc - 40)/10,  
+                                    x3 ~ (Time - 60)/15))
+# Now may use this like any other design, e.g., add a block to make it rotatable
+newdes <- join(mydes, star(alpha = "rotatable"))
 }
+
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
 \keyword{design}

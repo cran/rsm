@@ -1,5 +1,73 @@
 NEWS for rsm package
 
+Changes in version 2.00
+
+This is a major update of 'rsm'. It includes more pervasive and complete integration
+of coded.data, and improves flexibility in generating designs and RSM analysis.
+
+  * Old coded.data objects created before this version may need to be updated 
+    (via as.coded.data) in order to use some new functions such as join
+
+  * Allows more general rsm models, e.g. 
+        FO(x1,x2,x3,x4) + TWI(formula = ~x1:(x2+x3+x4)) + PQ(x1,x3)
+
+  * Can deal with singular second-order effects (e.g. stationary ridge). New threshold
+    option in canonical analysis to actually force singularity -- which likely will
+    identify a stationary point nearer the design center.
+
+  * All design-generating functions ALWAYS create coded.data objects, and they
+    have columns for run.order and std.order. There are additional (under the hood)
+    enhancements to coded.data to keep track of primary variables, blocks, etc.
+
+  * New cube(), star(), foldover(), dupe(), and join() functions for creating and
+    combining designs. These should usually be used in preference to ccd() when
+    doing iterative response-surface experimentation
+
+  * Added a oneblock argument to ccd() so we can create an un-blocked CCD
+
+  * A star block may be added to ANY design, including ones imported from other
+    packages. Options alpha = "orthogonal" and alpha = "rotatable" calculate the
+    the design moments, check suitability and set alpha to meet the criterion, or
+    raise an error condition if it cannot be met.
+
+  * New 'block' argument in coded-data-generating functions. May be needed to
+    identify blocking factor(s). 
+
+  * New varfcn() function for examining the scaled variance function for a design
+
+  * contour.lm, persp.lm, image.lm now have "decode" argument (TRUE by default) 
+    that displays decoded values on the coordinate axes when codings are available
+
+  * contour.lm et al. now average over any factor levels rather than picking the
+    first level of each. (May still specify particular levels in 'at')
+
+  * New vignette with a simulated example of a series of response-surface experiments
+
+  * Fixed some scoping bugs so that rsm can be called within a function. (This should
+    make it possible to retire the spotRsm function in the SPOT package)
+
+  * parse.coding function replaced by .parse.coding (and not exported)
+
+  * row.names attribute for a design is updated to 1:nrow(design) every time it is
+    randomized. 'ccd' does not create the same weird row names that it used to
+
+  * print.coded.data now has argument to decide whether to show coded values or 
+    actual values (actual is the default)
+
+  * function "codings<-" to change the codings
+
+  * function "[.coded.data" implemented for smarter handling of subsetted data;
+    for example, if a coded column is excluded, so is its coding.
+
+  * New functions "names<-.coded.data", "truenames.coded.data", "truenames<-.coded.data"
+    for smart handling of variable names, keeping coding consistent with names
+
+  * xs() function to obtain stationary point of an rsm object
+
+  * TWI() function now has optional 'formula' argument to aid in specifying
+    reduced version of second-order models
+
+
 Changes in version 1.41 (July 28, 2012)
 
   * Added a NAMESPACE so it will work in newer versions of R
