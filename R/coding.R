@@ -26,7 +26,6 @@
 # block, if non-missing, is PROPOSED name(s) for blocks. If pmatched (case insensitively)
 # to variables in data, those columns are designated blocking factors
 .rsdesattr = function(data, primary, block, call) {
-# ! stripping unnecessary stuff?    rsd = list(primary=primary, n0=c(NA,NA), non0=c(NA,NA), alpha="NA", blk.info=list())
     rsd = list(primary=primary)
     if (!missing(block)) {
         bidx = pmatch(tolower(block), tolower(names(data)))
@@ -59,17 +58,28 @@
 
 # Code the data in a data.frame; may specify as arguments or in a list
 coded.data = function(data, ..., formulas=list(...), block="block") {
-    if (length(formulas) == 0)
-        stop("must provide coding formulas")
     CALL = match.call()
     nm = names(data)
+    if (length(formulas) == 0) {
+#        stop("must provide coding formulas")
+# auto-generated codings ...       
+        codables = nm[sapply(data, function(x) length(unique(x)) < 6)]
+        if (any(!is.na(exc <- pmatch(tolower(block), tolower(codables)))))
+            codables = codables[-exc]
+        if (length(codables) == 0)
+            stop("No codings supplied and no variables with 5 or fewer distinct values")
+        for (i in 1:length(codables)) {
+            rng = range(as.numeric(data[[codables[i]]]))
+            ctr = round(mean(rng), 3)
+            div = round(rng[2] - ctr, 3)
+            formulas[[i]] = as.formula(paste(
+                "x", i, "~(", codables[i], "-", ctr, ")/", div, sep=""))
+            
+        }
+        warning("Automatic codings created -- may not be what you want")
+    }
+
     codings = list()
-# Maybe figure out more how to accommodate Ulrike's 'design' class in the future    
-#     if (inherits(data, "design")) {
-#         di = design.info(data)
-#         if (!is.null(di$coding))
-#             formulas = di$coding
-#     }
     for (f in formulas) {
         attr(f, ".Environment") = .GlobalEnv # keeps it from showing env when printed
         info = .parse.coding(f)
@@ -94,9 +104,21 @@ coded.data = function(data, ..., formulas=list(...), block="block") {
 
 # Add coding attributes to already-coded data
 as.coded.data = function(data, ..., formulas=list(...), block="block") {
+    if (!is.data.frame(data))
+        stop("'data' must inherit from \"data.frame\"")
     CALL = match.call()
-    if ((length(formulas) == 0) && is.coded.data(data))
-        formulas = codings(data)
+    if (length(formulas) == 0) {
+        if (is.coded.data(data))
+            formulas = codings(data)
+        else {
+            codable = sapply(data, function(x) zapsmall(c(mean(x), max(x)))[1] == 0)
+            if (sum(codable) == 0)
+                stop("No codings supplied and no variables look like coded variables")
+            formulas = sapply(names(data)[codable], function(nm) 
+                as.formula(paste(nm, "~", nm, ".as.is", sep="")))
+            warning("Default codings created -- may not be what you want")
+        }
+    }
     codings = list()
     for (f in formulas) {
         attr(f, ".Environment") = .GlobalEnv

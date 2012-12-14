@@ -70,7 +70,7 @@ truenames(x) <- value
   \code{halfwd} are numbers.  
   The left-hand side gives the name of the coded variable, and the right-hand side 
   should be a linear expression in the uncoded variable (linearity is \emph{not} explicitly 
-  checked, but nonlinear expressions will not decode correctly.) 
+  checked, but nonlinear expressions will not decode correctly.) If \code{coded.data} is called without formulas, automatic codings are created (along with a warning message). Automatic codings are based on transforming all non-block variables having five or fewer unique values to the interval [-1,1]. If no formulas are provided in \code{as.coded.data}, default coding formulas like those for \code{\link{cube}} are created all numeric variables with mean zero -- again with a warning message.
     
   An S3 \code{print} method is provided for the \code{coded.data} class; 
   it displays the data.frame in either coded or 
@@ -86,7 +86,7 @@ truenames(x) <- value
   are already coded, and the coding information is simply added. In addition, if \code{data} is 
   already a \code{coded.data} object from a pre-1.41 version of \pkg{rsm}, 
   it is converted to 
-  be compatible with new capabilities such as \code{\link{join}} (no \code{formulas} argument 
+  be compatible with new capabilities such as \code{\link{djoin}} (no \code{formulas} argument 
   is needed in this case). Any blocking factors should be specified in the \code{blocks} 
   argument.
   
@@ -133,10 +133,10 @@ truenames(x) <- value
   coded variables.
 }
 
-\note{Starting with \pkg{rsm} version 2.00, the \code{coded.data} class involves additional attributes to serve broader needs in design-generation. Because of this, old \code{coded.data} objects may need to be updated using \code{as.coded.data} if they are to be used with the newer functions such as \code{\link{join}}.}
+\note{Starting with \pkg{rsm} version 2.00, the \code{coded.data} class involves additional attributes to serve broader needs in design-generation. Because of this, old \code{coded.data} objects may need to be updated using \code{as.coded.data} if they are to be used with the newer functions such as \code{\link{djoin}}.}
 
 
-\seealso{\code{\link{data.frame}}, \code{\link{join}}, \code{\link{dupe}}, \code{\link{rsm}}}
+\seealso{\code{\link{data.frame}}, \code{\link{djoin}}, \code{\link{dupe}}, \code{\link{rsm}}}
 \references{
 Lenth RV (2009). ``Response-Surface Methods in R, Using rsm'', 
   \emph{Journal of Statistical Software}, 32(7), 1--17. 
@@ -161,15 +161,23 @@ names(CO)
 codings(CO)[2] <- NULL
 truenames(CO)
 
-### Import a design that is coded in a different way (e.g. from some other package)
-# ----- For example, a 3^3 design with each factor having levels (0, 1, 2)
-des3 <- expand.grid(A = 0:2, B = 0:2, C = 0:2)
-# ----- First, create a coded dataset with levels (-1, 0, 1):
-des3c <- coded.data(des3, x1 ~ A - 1,  x2 ~ B - 1,  x3 ~ C - 1)
-# ----- Now randomize and change the codings and variable names for the real situation:
-mydes <- dupe(des3c, coding = c(x1 ~ (Dose - 20)/5,  x2 ~ (Conc - 40)/10,  
+### Import a design that is coded in a different way
+
+if (require(conf.design)) { # ----- This example requires conf.design -----
+
+# First, generate a 3^3 in blocks and import it via coded.data
+    des3 <- coded.data(conf.design(p=3, G=c(1,1,2)))
+    # NOTE: This returns a warning message but does the right thing --
+    # It generates these names and coding formulas automatically:
+    #   x1 ~ (T1 - 2)/1
+    #   x2 ~ (T2 - 2)/1
+    #   x3 ~ (T3 - 2)/1
+# Now randomize and change the codings and variable names for the real situation:
+    mydes <- dupe(des3, coding = c(x1 ~ (Dose - 20)/5,  x2 ~ (Conc - 40)/10,  
                                 x3 ~ (Time - 60)/15))
-head(mydes)                                
+                                
+} # ----- end of example requiring package conf.design -----
+
 }
 \keyword{regression}
 \keyword{design}

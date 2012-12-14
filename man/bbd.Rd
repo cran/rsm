@@ -27,6 +27,8 @@ A \code{\link{coded.data}} object with the generated design and the additional v
 }
 \note{
   To avoid aliasing the pure-quadratic terms, you must use a positive value of \code{n0}.
+  
+    The non-exported function \code{rsm:::.bbd.1.41} is provided in case it is needed by other packages for compatibility with old versions of \pkg{rsm} (version 1.41 or earlier). Given the same seed, it will also reproduce the randomization as a previously generated design from an old version.
 }
 \references{
 Lenth RV (2009) ``Response-Surface Methods in R, Using rsm'', 

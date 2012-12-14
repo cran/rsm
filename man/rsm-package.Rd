@@ -12,7 +12,7 @@ The function \code{\link{ccd}} can generate (and randomize) a central-composite
 design; it allows the user to specify an aliasing or fractional blocking structure.
 The function \code{\link{bbd}} generates and randomizes a Box-Behnken design.  
 The function \code{\link{ccd.pick}} is useful for identifying good parameter choices
-in central-composite designs. Functions \code{cube}, \code{star}, \code{foldover}, \code{dupe}, and \code{join} are also provided to build-up designs from individual blocks. The function \code{varfcn} allows the experimenter to examine the predictive capabilities of a design before collecting data.
+in central-composite designs. Functions \code{cube}, \code{star}, \code{foldover}, \code{dupe}, and \code{djoin} are also provided to build-up designs from individual blocks. The function \code{varfcn} allows the experimenter to examine the predictive capabilities of a design before collecting data.
 
 The function \code{\link{rsm}} is an enhancement of \code{\link{lm}} that provides 
 for additional analyses peculiar to response surfaces.  It requires a model formula 

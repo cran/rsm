@@ -108,7 +108,7 @@ The point is, "varfcn" is a useful way to make sure you can estimate the model y
 \subsection{Looking further ahead}\label{lookahead2}
 As we mentioned, response-surface experimentation uses a building-block approach. It could be that we will want to augment this design so that we can fit a second-order surface. A popular way to do that is to do a followup experiment on  axis or ``star'' points at locations $\pm\alpha$ so that the two experiments combined may be used to fit a second-order model. Will this work? And if so, what does the variance function look like? Let's find out. It turns out that a rotatable design is not achievable by adding star points:
 \begin{Winput}
-R> join(expt1, star(n0 = 2, alpha = "rotatable"))
+R> djoin(expt1, star(n0 = 2, alpha = "rotatable"))
 \end{Winput}
 \begin{Woutput}
 Error in star(n0 = 2, alpha = "rotatable", basis = structure(list(run.order = 1:8,  :
@@ -117,7 +117,7 @@ Error in star(n0 = 2, alpha = "rotatable", basis = structure(list(run.order = 1:
 But here are the characteristics of a design with $\alpha = 1.5$:
 \begin{Winput}
 R> par(mfrow=c(1,2))
-R> followup = join(expt1, star(n0 = 2, alpha = 1.5))
+R> followup = djoin(expt1, star(n0 = 2, alpha = 1.5))
 R> varfcn(followup, ~ Block + SO(x1,x2,x3))
 R> varfcn(followup, ~ Block + SO(x1,x2,x3), contour = TRUE)
 \end{Winput}
@@ -309,21 +309,21 @@ x1 ~ (flour - 1.25)/0.1
 x2 ~ (sugar - 0.45)/0.1
 x3 ~ (butter - 0.25)/0.1
 \end{Woutput}
-Note that this experiment does indeed have different factor combinations (e.g., $(1.15,.35,.15))$ not present in "expt3". For analysis, we will combine "expt3" and "expt4", which is easily accomplished with  the "join" function. Note that "join" creates an additional blocking factor:
+Note that this experiment does indeed have different factor combinations (e.g., $(1.15,.35,.15))$ not present in "expt3". For analysis, we will combine "expt3" and "expt4", which is easily accomplished with  the "djoin" function. Note that "djoin" creates an additional blocking factor:
 \begin{Winput}
-R> names( join(expt3, expt4) )
+R> names( djoin(expt3, expt4) )
 \end{Winput}
 \begin{Woutput}
 [1] "run.order" "std.order" "x1"        "x2"        "x3"        "rating"    "Block"
 \end{Woutput}
 It's important to include this in the model because we have two separately randomized experiments. In this particular case, it's especially important because "expt4" seems to have  higher values overall than "expt3"; either the raters are in a better mood, or ambient conditions have changed. Here is our analysis:
 \begin{Winput}
-R> anal4 = rsm(rating ~ Block + FO(x1,x2,x3), data = join(expt3, expt4))
+R> anal4 = rsm(rating ~ Block + FO(x1,x2,x3), data = djoin(expt3, expt4))
 R> summary(anal4)
 \end{Winput}
 \begin{Woutput}
 Call:
-rsm(formula = rating ~ Block + FO(x1, x2, x3), data = join(expt3,
+rsm(formula = rating ~ Block + FO(x1, x2, x3), data = djoin(expt3,
     expt4))
 
             Estimate Std. Error t value  Pr(>|t|)
@@ -360,7 +360,7 @@ Because there is lack of fit, it's now a good idea to collect data at the ``star
 \begin{Winput}
 R> expt5 = star(expt4, n0 = 2, alpha = "orthogonal")
 R> par(mfrow=c(1,2))
-R> comb = join(expt3, expt4, expt5)
+R> comb = djoin(expt3, expt4, expt5)
 R> varfcn(comb, ~ Block + SO(x1,x2,x3))
 R> varfcn(comb, ~ Block + SO(x1,x2,x3), contour = TRUE)
 \end{Winput}
@@ -389,12 +389,12 @@ x3 ~ (butter - 0.25)/0.1
 \end{Woutput}
 We will fit a second-order model, accounting for the block effect.
 \begin{Winput}
-R> anal5 = rsm(rating ~ Block + SO(x1,x2,x3), data = join(expt3, expt4, expt5))
+R> anal5 = rsm(rating ~ Block + SO(x1,x2,x3), data = djoin(expt3, expt4, expt5))
 R> summary(anal5)
 \end{Winput}
 \begin{Woutput}
 Call:
-rsm(formula = rating ~ Block + SO(x1, x2, x3), data = join(expt3,
+rsm(formula = rating ~ Block + SO(x1, x2, x3), data = djoin(expt3,
     expt4, expt5))
 
                Estimate  Std. Error  t value  Pr(>|t|)
@@ -633,7 +633,7 @@ It has required 64 experimental runs to find this optimum. That is not too bad c
 \ifx %------- EXCISED ------------
 Just for amusement, the plot below shows all 64 observations in the 8 blocks, color-coded by block. One can visualize how strongly the blocks vary from one another, and the two search paths included in the process. Also, by focusing on a given color in the flour*sugar*butter panels, the design layouts can be visualized.
 %\begin{Rcode}{fig, width=9in, height=9in, scale=.7, label=all-expts}
-alldat = decode.data(join(expt1,expt2,expt3,expt4,expt5,expt6,expt7))
+alldat = decode.data(djoin(expt1,expt2,expt3,expt4,expt5,expt6,expt7))
 library(lattice)
 splom(~alldat[3:7], groups = ~Block, data = alldat)
 %\end{Rcode}

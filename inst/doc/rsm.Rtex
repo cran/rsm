@@ -206,7 +206,7 @@ While this is a small design, we have only one center point in the star block, n
 
 The choice of which design is best depends on the tradeoff between economy and ability to assess the fitted surface.  Design~1 is the only one of these that is included in Table~7.6 of \cite{Mye09}.  It is good to be able to look at a broader range of choices.
 
-Once we decide the design, the "ccd" function is used to generate it. (Alternatively, starting with \pkg{rsm} version 2.0, the "cube", "star", "foldover", and "dupe" functions are available for generating and randomizing a CCD in separate blocks, and then they may be combined using "join".)
+Once we decide the design, the "ccd" function is used to generate it. (Alternatively, starting with \pkg{rsm} version 2.0, the "cube", "star", "foldover", and "dupe" functions are available for generating and randomizing a CCD in separate blocks, and then they may be combined using "djoin".)
 We first illustrate the generation of Design~1 above.  This design requires a $2^{5-1}$ fraction for the cube block.  Typically, this is done by confounding the five-way interaction with the mean; or equivalently, create a four-factor design, and generate the levels of the fifth as the four-way interaction of the others.  That is the approach implemented by "ccd".
 Suppose that we denote the design factors by $A,B,C,D,E$; let's opt to use $E=-ABCD$ as the generator.  The following call generates the design (results not shown):
 \begin{Scode}
@@ -276,9 +276,9 @@ The results are not shown, but one finds there is still a small $p$~value for la
 To go further, we need more data.  Thus, let us pretend that we now collect the data in the second block. 
 Then here are the data from the combined blocks:
 \begin{Scode}
-( CR2 <- join(CR1, ChemReact2) )
+( CR2 <- djoin(CR1, ChemReact2) )
 \end{Scode}
-Notice that "join" figures out the fact that "ChemReact2" is not coded but it has the appropriate uncoded variables "Time" and~"Temp"; so it codes those variables appropriately. Also, the "Block" factor is added automatically.
+Notice that "djoin" figures out the fact that "ChemReact2" is not coded but it has the appropriate uncoded variables "Time" and~"Temp"; so it codes those variables appropriately. Also, the "Block" factor is added automatically.
 
 We are now in the position of fitting a full second-order model to the combined data.  This can be done by adding "PQ(x1, x2)" to the above model with interaction, but the easier way is to use "SO", which is shorthand for a model with "FO", "TWI", and "PQ" terms.  Also, we now need to account for the block effect since the data are collected in separate experiments:
 \begin{Scode}
