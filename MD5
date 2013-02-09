@@ -1,4 +1,4 @@
-c6b52835d337de82b264ed6e818431a0 *DESCRIPTION
+353856a5fa85dbe9087261577c67e761 *DESCRIPTION
 0e0f6acbdc8b4c666b5429f982f5ff4b *NAMESPACE
 019bbf1ba151780fde6ebcd300a1e11a *R/bbd.R
 839941d35dab96d01062d258ba39918b *R/ccd.R
@@ -7,10 +7,10 @@ a3a19ad72a38a75792cd4cbd0b626d2c *R/coding.R
 6112035bbdea7e0a804af0716baa0823 *R/contour-lm.R
 7cc07f3395c07e0be4e28b836f00aeda *R/datasets.R
 24803d026db84faa6eb730d5f430321c *R/old-ccd-bbd.R
-26137f20de5672a912ab8c10deede651 *R/rsm.R
+b27487e6092ab1b563d2b5f3138b3405 *R/rsm.R
 749daf8f3aeadd5c9d359c368f98b607 *R/varfcn.R
 02ea4b5ac0c5ee20788d4cd1c4c2d333 *inst/CITATION
-c38ab9abe677b7064454733417923fbc *inst/NEWS
+549ef80441b874f6bb2c888e72a6baf3 *inst/NEWS
 1a821d84a85b3e423f8b9f0afdd602e8 *inst/doc/rs-illus.Rtex
 c438c9706d87de1b2cca04d10911cdcd *inst/doc/rs-illus.pdf
 7ea0b78a6ad24ec93425d094cb76dcf9 *inst/doc/rsm-plots.Rtex
@@ -20,7 +20,7 @@ eea25384b7d0b8a9fc58f850e22485a3 *inst/doc/rsm.pdf
 a46bb2651998559e24c035413cd6e17d *man/ChemReact.Rd
 ca07356f96a6bea405e11811b588f6a5 *man/FO.Rd
 6ecd0a658be65b78ae9b6fa3bccca3ba *man/bbd.Rd
-b9b0196156f6e4f1a68c25025b6e3231 *man/ccd.Rd
+7193b6726a6d03950ced6f1ba4954b92 *man/ccd.Rd
 d935674bb6c1e7be3f340968a9db61fb *man/ccd.pick.Rd
 3d895f1a54bfd03c40f7eda7b892b456 *man/codata.Rd
 14721e5aa200157796b0b97fdfe23549 *man/coded.data.Rd
