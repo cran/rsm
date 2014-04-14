@@ -1,6 +1,6 @@
 Package: rsm
-Version: 2.04
-Date: 2014-02-05
+Version: 2.05
+Date: 2014-04-14
 Title: Response-surface analysis
 Author: Russell V. Lenth
 Maintainer: Russell V Lenth <russell-lenth@uiowa.edu>
@@ -9,7 +9,7 @@ Suggests: Vdgraph, conf.design, DoE.base, FrF2
 License: GPL-2
 LazyLoad: yes
 LazyData: yes
-Packaged: 2014-02-05 16:36:26 UTC; rlenth
+Packaged: 2014-04-14 15:32:30 UTC; rlenth
 NeedsCompilation: no
 Repository: CRAN
-Date/Publication: 2014-02-05 17:46:38
+Date/Publication: 2014-04-14 19:26:42

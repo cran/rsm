@@ -1,4 +1,4 @@
-9c76206e8b58b2967980acdd47091556 *DESCRIPTION
+ca6507e2860875c6c72b1e2f87f4b30e *DESCRIPTION
 2f706d1ed4b44e791f9383d7a7e9bee1 *NAMESPACE
 919da6b5cb6302914e67dcde66c4e58b *R/bbd.R
 839941d35dab96d01062d258ba39918b *R/ccd.R
@@ -7,11 +7,11 @@ a3a19ad72a38a75792cd4cbd0b626d2c *R/coding.R
 2b797eda2502320bfeea86ace4bdded4 *R/contour-lm.R
 7cc07f3395c07e0be4e28b836f00aeda *R/datasets.R
 401a28b680df4e3e3d37a26e077e8b2e *R/old-ccd-bbd.R
-b27487e6092ab1b563d2b5f3138b3405 *R/rsm.R
+052daffce1abbb385cd2b88e757b7510 *R/rsm.R
 749daf8f3aeadd5c9d359c368f98b607 *R/varfcn.R
-de3af6500b75ec9f834ca134f085cbe5 *build/vignette.rds
+03ffee2d7dba0a120a8bc0a367703182 *build/vignette.rds
 02ea4b5ac0c5ee20788d4cd1c4c2d333 *inst/CITATION
-13c67c441a9d94492da7fa8eb443e3ed *inst/NEWS
+6d435747866a3690aba9a76c3385546d *inst/NEWS
 1a821d84a85b3e423f8b9f0afdd602e8 *inst/doc/rs-illus.Rtex
 c438c9706d87de1b2cca04d10911cdcd *inst/doc/rs-illus.pdf
 604dfe4e7b42f26b4b08a900316dd1bb *inst/doc/rsm-plots.R
