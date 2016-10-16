@@ -15,14 +15,19 @@ importFrom("stats",
            "lm", 
            "model.frame", 
            "model.matrix", 
+           "na.pass",
+           "p.adjust",
+           "p.adjust.methods",
            "pf",
            "predict", 
            "printCoefmat", 
+           "reformulate",
            "rnorm", 
            "runif", 
            "sd", 
            "terms",
-           "uniroot")
+           "uniroot",
+           "update")
      
 import(graphics)
 
@@ -43,12 +48,76 @@ S3method(contour, lm)
 S3method(image, lm)
 S3method(persp, lm)
 
+# lsmeans support
+if (requireNamespace("lsmeans", quietly = TRUE)) {
+    importFrom("lsmeans", "recover.data", "lsm.basis")
+    importFrom("estimability", "all.estble", "nonest.basis")
+    S3method(recover.data, rsm)
+    S3method(lsm.basis, rsm)
+}
+
 
 # Exports
 
-### exportPattern("^[[:alpha:]]+")
+### exportPattern("^[[:alpha:]]+") - using explicit exports below
 #--- export all that don't start with "."
-exportPattern("^[^\\.]")
+#exportPattern("^[^\\.]")
 
 # --- to make Ulrike's life easier...
-export(.ccd.1.41, .bbd.1.41)
+#export(.ccd.1.41, .bbd.1.41)
+
+export(".bbd.1.41", 
+       ".ccd.1.41", 
+#       "[.coded.data", 
+       "as.coded.data", 
+       "bbd", 
+       "canonical", 
+       "canonical.path", 
+       "ccd", 
+       "ccd.pick", 
+       "ChemReact", 
+       "ChemReact1", 
+       "ChemReact2", 
+       "codata", 
+       "code2val", 
+       "coded.data", 
+       "codings", 
+#       "codings.coded.data", 
+#       "codings.rsm", 
+       "codings<-", 
+#       "contour.lm", 
+       "cube", 
+       "decode.data", 
+       "djoin", 
+       "dupe", 
+       "FO", 
+       "foldover", 
+       "heli", 
+#       "image.lm", 
+       "is.coded.data", 
+       "loftest", 
+#       "lsm.basis.rsm", 
+       "model.data", 
+#       "names<-.coded.data", 
+       "PE", 
+#       "persp.lm", 
+       "PQ", 
+#       "print.coded.data", 
+#       "print.summary.rsm", 
+       "recode.data", 
+#       "recover.data.rsm", 
+       "rsm", 
+       "SO", 
+       "star", 
+       "stdorder", 
+       "steepest", 
+#       "summary.rsm", 
+       "truenames", 
+#       "truenames.coded.data", 
+       "truenames<-", 
+#       "truenames<-.coded.data", 
+       "TWI", 
+       "val2code", 
+       "varfcn", 
+       "xs"
+)
