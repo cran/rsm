@@ -1,25 +1,66 @@
+##############################################################################
+#    Copyright (c) 2008-2010, 2012-2016 Russell V. Lenth                     #
+#                                                                            #
+#    This file is part of the rsm package for R (*rsm*)                      #
+#                                                                            #
+#    *rsm* is free software: you can redistribute it and/or modify           #
+#    it under the terms of the GNU General Public License as published by    #
+#    the Free Software Foundation, either version 2 of the License, or       #
+#    (at your option) any later version.                                     #
+#                                                                            #
+#    *rsm* is distributed in the hope that it will be useful,                #
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of          #
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           #
+#    GNU General Public License for more details.                            #
+#                                                                            #
+#    A copy of the GNU General Public License is available at                #
+#    <https://www.r-project.org/Licenses/>                                   #
+##############################################################################
+
 ### Reconstructs the data set used in a linear model, and
 ### returns it as a data.frame
 
+# # Old version -- had a couple of issues related to scoping
+# model.data = function (lmobj, lhs = FALSE) {
+#     form = lmobj$call$formula
+#     if (is.name(form)) {
+#         lmobj$call$data = form
+#         form = formula(lmobj)
+#     }
+#     if (lhs) 
+#         nm = all.vars(form)
+#     else nm = all.vars(form[[3]])
+#     if (inherits(lmobj, "rsm") && !is.null(lmobj$data))
+#         lmobj$data[ ,nm]
+#     else {
+#         form = as.formula(paste("~", paste(nm, collapse = "+")))
+#         envir = attr(lmobj$terms, ".Environment")
+#         model.frame(form, eval(lmobj$call$data, envir=envir), 
+#             subset = eval(lmobj$call$subset, envir=envir))
+#     }
+# }
+
+### New version based on lsmeans:::recover.data.call
 model.data = function (lmobj, lhs = FALSE) {
-    form = lmobj$call$formula
-    if (is.name(form)) {
-        lmobj$call$data = form
-        form = formula(lmobj)
-    }
-    if (lhs) 
-        nm = all.vars(form)
-    else nm = all.vars(form[[3]])
-    if (inherits(lmobj, "rsm") && !is.null(lmobj$data))
-        lmobj$data[ ,nm]
+    fcall = lmobj$call
+    m = match(c("formula", "data", "subset", "weights"), names(fcall), 0L)
+    fcall = fcall[c(1L, m)]
+    fcall[[1L]] = as.name("model.frame")
+    trms = terms(lmobj)
+    if (!lhs)
+        trms = delete.response(trms)
+    vars = all.vars(trms)
+    if(!is.null(dat <- lmobj$data))
+        dat[, vars, drop = FALSE]
     else {
-        form = as.formula(paste("~", paste(nm, collapse = "+")))
-        envir = attr(lmobj$terms, ".Environment")
-        model.frame(form, eval(lmobj$call$data, envir=envir), 
-            subset = eval(lmobj$call$subset, envir=envir))
+        form = reformulate(vars)
+        fcall$formula = update(trms, form)
+        env = environment(trms)
+        if (is.null(env)) 
+            env = parent.frame()
+        eval(fcall, env, parent.frame())
     }
 }
-
 
 ### contour plot(s) for a lm
 contour.lm = function(x, form, at, bounds, zlim, 
