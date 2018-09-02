@@ -1,6 +1,6 @@
 Package: rsm
-Version: 2.9
-Date: 2017-10-23
+Version: 2.10
+Date: 2018-09-01
 Title: Response-Surface Analysis
 Authors@R: c(person("Russell", "Lenth", role = c("aut", "cre"), 
     email = "russell-lenth@uiowa.edu"))
@@ -17,8 +17,8 @@ License: GPL (>= 2)
 LazyLoad: yes
 LazyData: yes
 NeedsCompilation: no
-Packaged: 2017-10-23 19:59:07 UTC; rlenth
+Packaged: 2018-09-01 20:16:40 UTC; rlenth
 Author: Russell Lenth [aut, cre]
 Maintainer: Russell Lenth <russell-lenth@uiowa.edu>
 Repository: CRAN
-Date/Publication: 2017-10-24 07:31:54 UTC
+Date/Publication: 2018-09-02 20:50:02 UTC
