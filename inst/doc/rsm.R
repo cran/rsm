@@ -63,15 +63,15 @@ des10 <- ccd( ~ A + B + C + D + E,
 ###################################################
 ### code chunk number 10: varfcn
 ###################################################
-par(mfrow=c(1,2))
-varfcn(des10, ~ Blk + SO(A,B,C,D,E), dist = seq(0, 3, by=.1))
-varfcn(des10, ~ Blk + SO(A,B,C,D,E), dist = seq(0, 3, by=.1), contour = TRUE)
+par(mfrow = c(1, 2))
+varfcn(des10, ~ Blk + SO(A,B,C,D,E), dist = seq(0, 3, by = .1))
+varfcn(des10, ~ Blk + SO(A,B,C,D,E), dist = seq(0, 3, by = .1), contour = TRUE)
 
 
 ###################################################
 ### code chunk number 11: rsm.Rtex:251-252
 ###################################################
-ccd(2, n0 = c(1,1), inscribed=TRUE, randomize=FALSE)
+ccd(2, n0 = c(1, 1), inscribed = TRUE, randomize = FALSE)
 
 
 ###################################################
@@ -144,31 +144,37 @@ canonical(CO.rsm)
 
 
 ###################################################
-### code chunk number 22: rsm.Rtex:362-363
+### code chunk number 22: rsm.Rtex:366-367
 ###################################################
-canonical(CO.rsm, threshold = .2)
+canonical(CO.rsm, threshold = 0)
 
 
 ###################################################
 ### code chunk number 23: rr-code (eval = FALSE)
 ###################################################
-## contour(CO.rsm, x2 ~ x1, bounds = list(x1=c(-16,2), x2=c(-2,16)), 
-##         zlim=c(-100,100), col="gray", decode = FALSE)
-## lines(c(-1,1,1,-1,-1), c(-1,-1,1,1,-1), col="green") # design region
-## points(x2 ~ x1, data=canonical.path(CO.rsm), col="red", pch=1+6*(dist==0))
-## points(x2 ~ x1, data=canonical.path(CO.rsm, threshold=.2), 
-##         col="blue", pch=1+6*(dist==0))
+## contour(CO.rsm, x2 ~ x1, bounds = list(x1 = c(-16, 2), x2 = c(-2, 16)), 
+##         zlim = c(-100, 100), col = "gray", decode = FALSE)
+## lines(c(-1,1,1,-1,-1), c(-1,-1,1,1,-1), col = "green") # design region
+## points(x2 ~ x1, data = canonical.path(CO.rsm), 
+##         col = "blue", pch = 1 + 6*(dist == 0))
+## points(x2 ~ x1, data = canonical.path(CO.rsm, threshold = 0), 
+##         col = "red", pch = 1 + 6*(dist == 0))
+## points(x2 ~ x1, data=steepest(CO.rsm), 
+##         col = "magenta", pch = 1 + 6*(dist == 0))
 
 
 ###################################################
 ### code chunk number 24: rising-ridge
 ###################################################
 par(mar=.1+c(4,4,0,0))
-contour(CO.rsm, x2 ~ x1, bounds = list(x1=c(-16,2), x2=c(-2,16)), 
-        zlim=c(-100,100), col="gray", decode = FALSE)
-lines(c(-1,1,1,-1,-1), c(-1,-1,1,1,-1), col="green") # design region
-points(x2 ~ x1, data=canonical.path(CO.rsm), col="red", pch=1+6*(dist==0))
-points(x2 ~ x1, data=canonical.path(CO.rsm, threshold=.2), 
-        col="blue", pch=1+6*(dist==0))
+contour(CO.rsm, x2 ~ x1, bounds = list(x1 = c(-16, 2), x2 = c(-2, 16)), 
+        zlim = c(-100, 100), col = "gray", decode = FALSE)
+lines(c(-1,1,1,-1,-1), c(-1,-1,1,1,-1), col = "green") # design region
+points(x2 ~ x1, data = canonical.path(CO.rsm), 
+        col = "blue", pch = 1 + 6*(dist == 0))
+points(x2 ~ x1, data = canonical.path(CO.rsm, threshold = 0), 
+        col = "red", pch = 1 + 6*(dist == 0))
+points(x2 ~ x1, data=steepest(CO.rsm), 
+        col = "magenta", pch = 1 + 6*(dist == 0))
 
 
